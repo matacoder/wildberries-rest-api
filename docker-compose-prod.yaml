@@ -1,0 +1,62 @@
+version: '3.9'
+# instruction at the end of file
+
+volumes:
+  postgres_data:
+  static:
+  media:
+  nginx_conf:
+
+services:
+  db:
+    image: postgres:12.4
+    restart: always
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    env_file:
+      - ./.env
+  django:
+    image: "${DOCKER_USERNAME}/${DOCKER_IMAGE}:latest"
+    depends_on:
+      - db
+    restart: always
+    env_file:
+      - ./.env
+    volumes:
+      - static:/code/static
+      - media:/code/media
+      - nginx_conf:/code/nginx/
+    entrypoint: /code/entrypoint.sh
+
+  nginx:
+    image: nginx:1.19.0-alpine
+    ports:
+      - "127.0.0.1:1111:80"
+    volumes:
+      - static:/code/static
+      - media:/code/media
+      - nginx_conf:/etc/nginx/conf.d/
+    depends_on:
+      - django
+    restart: always
+
+
+#### STEP 0 #### Create new context to remote control your server docker
+# docker context create new_ip --docker "host=ssh://username@ip"
+
+#### STEP 1 #### Build and push your docker image on local PC (use variables in .env)
+# docker build -t username/project:latest .
+# docker push username/project:latest
+
+#### STEP 2 #### Switch to remote server docker
+# docker context use new_ip
+
+#### STEP 3 #### Down your compose, pull new image, up your compose
+# docker compose -f docker-compose-prod.yaml down
+# here consider deleting static volume if you have static files modified
+
+# docker pull username/project:latest
+# docker compose -f docker-compose-prod.yaml up -d --force-recreate
+
+#### STEP 4 #### Don't forget to switch back to your local docker
+# docker context use default

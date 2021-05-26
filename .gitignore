@@ -1,0 +1,8 @@
+/.venv/
+
+# Static and Media contents
+media/*
+static/admin/*
+!media/.gitkeep
+!static/.gitkeep
+/.idea/

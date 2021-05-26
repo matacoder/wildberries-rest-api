@@ -1,0 +1,37 @@
+version: '3.9'
+# run docker-compose up to start development at http://127.0.0.1:1111
+
+volumes:
+  postgres_data:
+
+services:
+  db:
+    image: postgres:12.4
+    restart: always
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    env_file:
+      - ./.env
+  django:
+    build: .
+    depends_on:
+      - db
+    restart: always
+    env_file:
+      - ./.env
+    volumes:
+      - .:/code/
+
+    entrypoint: /code/entrypoint.sh
+
+  nginx:
+    image: nginx:1.19.0-alpine
+    ports:
+      - "127.0.0.1:1111:80"
+    volumes:
+      - ./static:/code/static
+      - ./media:/code/media
+      - ./nginx:/etc/nginx/conf.d/
+    depends_on:
+      - django
+    restart: always

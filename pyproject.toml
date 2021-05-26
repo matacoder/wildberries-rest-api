@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "django-docker"
+version = "0.1.0"
+description = "Django template for fast development and deployment using Docker Compose"
+authors = ["Denis Matakov <denis@matakov.com>"]
+license = "MIT License"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+Django = "^3.2.3"
+black = "^21.5b1"
+gunicorn = "^20.1.0"
+psycopg2-binary = "^2.8.6"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
