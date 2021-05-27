@@ -10,23 +10,32 @@ import requests
 class RestClient:
     def __init__(self):
         self.token = os.getenv("WB_TOKEN")
+        self.base_url = "https://suppliers-stats.wildberries.ru/api/v1/supplier/"
 
-    @abstractmethod
-    def get_data(self):
-        pass
+    @staticmethod
+    def get_date():
+        date = datetime.datetime.today()
+        return date.strftime("%Y-%m-%dT00:00:00.000Z")
 
+    @staticmethod
+    def connect(params, server):
+        response = requests.get(url=server, params=params)
+        logging.warning(f"{response.url}")
+        return response
 
-class WarehouseRestClient(RestClient):
-    def __init__(self):
-        super().__init__()
-        self.server = "https://suppliers-stats.wildberries.ru/api/v1/supplier/stocks"
-
-    def get_data(self):
-        date = datetime.datetime.now() - datetime.timedelta(days=1)
+    def get_stock(self):
         params = {
-            "dateFrom": date.strftime("%Y-%m-%dT00:00:01.000Z"),
+            "dateFrom": self.get_date(),
             "key": self.token,
         }
-        response = requests.get(url=self.server, params=params)
-        logging.debug(f"{response.url}")
-        return response
+        return self.connect(params, self.base_url + "stocks")
+
+    def get_ordered(self):
+        params = {
+            "dateFrom": self.get_date(),
+            "key": self.token,
+            "flag": 1,
+        }
+        return self.connect(params, self.base_url + "orders")
+
+
