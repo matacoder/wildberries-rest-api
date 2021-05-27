@@ -22,9 +22,10 @@ class WarehouseRestClient(RestClient):
         self.server = "https://suppliers-stats.wildberries.ru/api/v1/supplier/stocks"
 
     def get_data(self):
+        date = datetime.datetime.now() - datetime.timedelta(days=1)
         params = {
-            "dateFrom": datetime.datetime.now().strftime("%Y-%m-%dT00:00:01.000Z"),
-            "key": self.token
+            "dateFrom": date.strftime("%Y-%m-%dT00:00:01.000Z"),
+            "key": self.token,
         }
         response = requests.get(url=self.server, params=params)
         logging.debug(f"{response.url}")
