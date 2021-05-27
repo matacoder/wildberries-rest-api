@@ -18,3 +18,15 @@ def index(request):
     except Exception as e:
         logging.warning(e)
     return render(request, "index.html", {"data": page_obj})
+
+
+def stock(request):
+    return None
+
+
+def ordered(request):
+    return None
+
+
+def bought(request):
+    return None
