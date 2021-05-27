@@ -16,7 +16,7 @@ services:
     env_file:
       - ./.env
   django:
-    image: "${DOCKER_USERNAME}/${DOCKER_IMAGE}:latest"
+    image: "${DOCKER_USERNAME}/wb:latest"
     depends_on:
       - db
     restart: always
@@ -31,7 +31,7 @@ services:
   nginx:
     image: nginx:1.19.0-alpine
     ports:
-      - "127.0.0.1:1111:80"
+      - "127.0.0.1:1112:80"
     volumes:
       - static:/code/static
       - media:/code/media

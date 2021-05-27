@@ -13,6 +13,8 @@ import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
+from django.urls import reverse
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
@@ -25,7 +27,9 @@ SECRET_KEY = os.environ.get("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    "wb.matakov.com",
+]
 
 
 # Application definition
@@ -41,7 +45,7 @@ INSTALLED_APPS = [
     "wb",
 ]
 
-LOGIN_REDIRECT_URL = "/"
+LOGIN_REDIRECT_URL = reverse("api")
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
