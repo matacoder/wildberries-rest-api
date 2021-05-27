@@ -8,8 +8,12 @@ from wb.services import RestClient
 from django.core.paginator import Paginator
 
 
-@login_required
 def index(request):
+    return render(request, "index.html", {})
+
+
+@login_required
+def stock(request):
     client = RestClient(user=request.user)
     page_obj = []
     try:
@@ -21,12 +25,7 @@ def index(request):
         page_obj = paginator.get_page(page_number)
     except Exception as e:
         logging.warning(e)
-    return render(request, "index.html", {"data": page_obj})
-
-
-@login_required
-def stock(request):
-    return index(request)
+    return render(request, "stock.html", {"data": page_obj})
 
 
 @login_required

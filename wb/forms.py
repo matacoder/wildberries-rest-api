@@ -6,4 +6,6 @@ from wb.models import ApiKey
 class ApiForm(ModelForm):
     class Meta:
         model = ApiKey
-        fields = ['api', ]
+        fields = [
+            "api",
+        ]
