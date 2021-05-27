@@ -28,7 +28,7 @@ def ordered(request):
     client = RestClient()
     page_obj = []
     try:
-        data = client.get_ordered().json()
+        data = client.get_ordered(url="orders").json()
         sorted_by_date = sorted(data, key=lambda x: x["date"], reverse=True)
         paginator = Paginator(sorted_by_date, 32)
         page_number = request.GET.get("page")
@@ -39,4 +39,14 @@ def ordered(request):
 
 
 def bought(request):
-    return None
+    client = RestClient()
+    page_obj = []
+    try:
+        data = client.get_ordered(url="sales").json()
+        sorted_by_date = sorted(data, key=lambda x: x["date"], reverse=True)
+        paginator = Paginator(sorted_by_date, 32)
+        page_number = request.GET.get("page")
+        page_obj = paginator.get_page(page_number)
+    except Exception as e:
+        logging.warning(e)
+    return render(request, "ordered.html", {"data": page_obj})

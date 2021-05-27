@@ -30,12 +30,11 @@ class RestClient:
         }
         return self.connect(params, self.base_url + "stocks")
 
-    def get_ordered(self):
+    def get_ordered(self, url):
         params = {
             "dateFrom": self.get_date(),
             "key": self.token,
             "flag": 1,
         }
-        return self.connect(params, self.base_url + "orders")
-
+        return self.connect(params, self.base_url + url)
 

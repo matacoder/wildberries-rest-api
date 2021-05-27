@@ -22,6 +22,9 @@
                         Qty: {{ item.quantity }}<br/>
                         Full price {{ item.totalPrice }} rub.<br/>
                         Total Discount: {{ item.discountPercent }}%<br/>
+                        {% if item.finishedPrice %}
+                        Price: {{ item.finishedPrice }}, Income: {{ item.forPay }}
+                        {% endif %}
                     </div>
                 </div>
             </div>
