@@ -29,6 +29,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
     "wb.matakov.com",
+    "127.0.0.1"
 ]
 
 
@@ -45,7 +46,7 @@ INSTALLED_APPS = [
     "wb",
 ]
 
-LOGIN_REDIRECT_URL = reverse("api")
+LOGIN_REDIRECT_URL = "/api/"
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
