@@ -1,0 +1,33 @@
+{% load custom_tags %}
+<br/>
+<div class="columns is-multiline is-mobile has-text-centered">
+    <!-- section1 -->
+    {% for item in data %}
+        <div class="column is-3-tablet is-6-mobile">
+            <div class="card">
+                <div class="card-image">
+                    <figure class="image is-3by4">
+                        <img src="{% get_image_url item.nmId %}"/>
+                    </figure>
+                </div>
+                <div class="card-content">
+                    <a target="_blank"
+                       href="https://www.wildberries.ru/catalog/{{ item.nmId }}/detail.aspx?targetUrl=ES">
+                        <p class="title is-5">{{ item.supplierArticle }}<br/>
+                            Size: {{ item.techSize }}</p>
+                    </a>
+                    <div class="content">
+                        Order: {{ item.number }} from {{ item.date }}<br/>
+                        To: {{ item.oblast }} from: {{ item.warehouseName }}<br/>
+                        Qty: {{ item.quantity }}<br/>
+                        Full price {{ item.totalPrice }} rub.<br/>
+                        Total Discount: {{ item.discountPercent }}%<br/>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+
+</div>
+<br/>
+{% include 'includes/pages.html' %}
