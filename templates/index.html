@@ -6,20 +6,8 @@
     {% load custom_tags %}
     <br/>
     <h1 class="title">
-        Wildberries goods
+        Warehouse stock
     </h1>
-    <br/>
-    <div class="columns is-multiline is-mobile has-text-centered">
-        <!-- section1 -->
-        {% for item in data %}
-            <div class="column is-3-tablet is-6-mobile">
-                <img src="{% get_image_url item.nmId %}"/>
-                <p class="is-size-4">{{ item.supplierArticle }} Size: {{ item.techSize }}</p>
-                <p class="is-size-6">{{ item.quantity }} pieces for {{ item.Price }} each.</p>
-            </div>
-        {% endfor %}
-
-    </div>
-    <br/>
+    {% include "includes/card.html" %}
     {% include 'includes/pages.html' %}
 {% endblock %}

@@ -1,0 +1,36 @@
+{% load custom_tags %}
+<br/>
+<div class="columns is-multiline is-mobile has-text-centered">
+    <!-- section1 -->
+    {% for item in data %}
+        <div class="column is-3-tablet is-6-mobile">
+            <div class="card">
+                <div class="card-image">
+                    <figure class="image is-3by4">
+                        <img src="{% get_image_url item.nmId %}"/>
+                    </figure>
+                </div>
+                <div class="card-content">
+                    <a target="_blank"
+                       href="https://www.wildberries.ru/catalog/{{ item.nmId }}/detail.aspx?targetUrl=ES">
+                        <p class="title is-5">{{ item.supplierArticle }}<br/>
+                            Size: {{ item.techSize }}</p>
+                    </a>
+                    <div class="content">
+                        Barcode: {{ item.barcode }}<br/>
+                        Warehouse: {{ item.warehouseName }}<br/>
+                        To clients: {{ item.inWayToClient }},
+                        from {{ item.inWayFromClient }}<br/>
+                        On site {{ item.daysOnSite }} days<br/>
+                        <progress class="progress is-primary" value="{{ item.daysOnSite }}"
+                                  max="999"></progress>
+                        {{ item.quantity }} pieces for {{ item.Price }} rub. each<br/>
+                        Discount: {{ item.Discount }}%<br/>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+
+</div>
+<br/>
