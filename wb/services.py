@@ -1,15 +1,15 @@
 import datetime
 import logging
 import os
-from abc import abstractmethod
-from email.utils import format_datetime
 
 import requests
 
+from wb.models import ApiKey
+
 
 class RestClient:
-    def __init__(self):
-        self.token = os.getenv("WB_TOKEN")
+    def __init__(self, user):
+        self.token = ApiKey.objects.get(user=user.id).api
         self.base_url = "https://suppliers-stats.wildberries.ru/api/v1/supplier/"
 
     @staticmethod
@@ -37,4 +37,3 @@ class RestClient:
             "flag": 1,
         }
         return self.connect(params, self.base_url + url)
-

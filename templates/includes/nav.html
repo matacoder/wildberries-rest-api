@@ -43,7 +43,7 @@
                             Log in
                         </a>
                     {% else %}
-                        <a class="button is-primary" href="{% url 'index' %}">
+                        <a class="button is-primary" href="{% url 'api' %}">
                             <strong>{{ user.username }}</strong>
                         </a>
                         <a class="button is-light" href="{% url 'logout' %}">Log out</a>

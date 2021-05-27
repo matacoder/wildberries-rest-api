@@ -1,12 +1,16 @@
 import logging
 
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
+
+from wb.forms import ApiForm
 from wb.services import RestClient
 from django.core.paginator import Paginator
 
 
+@login_required
 def index(request):
-    client = RestClient()
+    client = RestClient(user=request.user)
     page_obj = []
     try:
         data = client.get_stock().json()
@@ -20,12 +24,14 @@ def index(request):
     return render(request, "index.html", {"data": page_obj})
 
 
+@login_required
 def stock(request):
     return index(request)
 
 
+@login_required
 def ordered(request):
-    client = RestClient()
+    client = RestClient(user=request.user)
     page_obj = []
     try:
         data = client.get_ordered(url="orders").json()
@@ -38,8 +44,9 @@ def ordered(request):
     return render(request, "ordered.html", {"data": page_obj})
 
 
+@login_required
 def bought(request):
-    client = RestClient()
+    client = RestClient(user=request.user)
     page_obj = []
     try:
         data = client.get_ordered(url="sales").json()
@@ -50,3 +57,12 @@ def bought(request):
     except Exception as e:
         logging.warning(e)
     return render(request, "ordered.html", {"data": page_obj})
+
+
+@login_required
+def api(request):
+    form = ApiForm(request.POST or None)
+    if form.is_valid():
+        form.instance.user = request.user
+        form.save()
+    return render(request, "api.html", {"form": form})
