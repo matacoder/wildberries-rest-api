@@ -23,8 +23,7 @@ jobs:
           ssh-host: ${{ secrets.IP_HOST }}
 
       - name: Install latest version of docker with experimental compose support
-        run: |
-          sudo pip install docker
+        uses: docker-practice/actions-setup-docker@master
 
       - name: Add environment variables
         run: |
