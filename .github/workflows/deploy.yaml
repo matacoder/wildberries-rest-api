@@ -26,9 +26,11 @@ jobs:
         run: |
           pip install docker-compose
 
-      - name: Add environment variables
-        run: |
-          echo ${{ secrets.ENV }} | base64 -d > .env
+      - name: Generate env file from Base64 encoded string (base64 -i .env)
+        uses: RollyPeres/base64-to-path@v1
+        with:
+          filePath: ${{ github.workspace }}/.env
+          encodedString: ${{ secrets.ENV }}
 
       - name: Remote docker compose down/up using context (zero files)
         run: |
