@@ -25,6 +25,7 @@ jobs:
       - name: Install latest version of docker with experimental compose support
         run: |
           curl -L https://raw.githubusercontent.com/docker/compose-cli/main/scripts/install/install_linux.sh | sh
+          pip install docker-compose
 
       - name: Add environment variables
         run: |
@@ -45,8 +46,8 @@ jobs:
           docker context create remote --docker "host=ssh://${{ secrets.SSH_USER }}@${{ secrets.IP_HOST }}"
           docker context use remote
           docker image prune -f
-          docker compose -f docker-compose-prod.yaml down
-          docker compose -f docker-compose-prod.yaml up -d --build --force-recreate
+          docker-compose --context remote -f docker-compose-prod.yaml down
+          docker-compose --context remote -f docker-compose-prod.yaml up -d --build --force-recreate
 
   send_message:
     name: Send telegram notification
