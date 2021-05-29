@@ -45,7 +45,7 @@ services:
 # docker context create new_ip --docker "host=ssh://username@ip"
 
 #### STEP 1 #### Build and push your docker image on local PC (use variables in .env)
-# docker build -t username/project:latest .
+# docker build -t matakov/wb:latest .
 # docker push username/project:latest
 
 #### STEP 2 #### Switch to remote server docker

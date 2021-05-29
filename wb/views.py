@@ -1,17 +1,18 @@
 import logging
 
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
 from django.shortcuts import render
 
 from wb.forms import ApiForm
-from django.core.paginator import Paginator
-
-from wb.services import get_bought_products
-from wb.services import get_bought_sum
-from wb.services import get_ordered_products
-from wb.services import get_ordered_sum
-from wb.services import get_stock_products
-from wb.services import get_weekly_payment
+from wb.services import (
+    get_bought_products,
+    get_bought_sum,
+    get_ordered_products,
+    get_ordered_sum,
+    get_stock_products,
+    get_weekly_payment,
+)
 
 
 def index(request):
