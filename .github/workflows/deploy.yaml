@@ -23,7 +23,8 @@ jobs:
           ssh-host: ${{ secrets.IP_HOST }}
 
       - name: Install latest version of docker with experimental compose support
-        uses: docker-practice/actions-setup-docker@master
+        run: |
+          curl -L https://raw.githubusercontent.com/docker/compose-cli/main/scripts/install/install_linux.sh | sh
 
       - name: Add environment variables
         run: |
