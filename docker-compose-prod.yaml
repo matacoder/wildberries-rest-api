@@ -16,7 +16,7 @@ services:
     env_file:
       - ./.env
   django:
-    image: "${DOCKER_USERNAME}/wb:latest"
+    build: .
     depends_on:
       - db
     restart: always
