@@ -35,19 +35,11 @@ class RestClient:
         }
         return self.connect(params, self.base_url + "stocks")
 
-    def get_ordered(self, url, week=False):
+    def get_ordered(self, url, week=False, flag=1):
         params = {
             "dateFrom": self.get_date(week),
             "key": self.token,
-            "flag": 1,
-        }
-        return self.connect(params, self.base_url + url)
-
-    def get_to_pay(self, url, week=False):
-        params = {
-            "dateFrom": self.get_date(week),
-            "key": self.token,
-            "flag": 0,
+            "flag": flag,
         }
         return self.connect(params, self.base_url + url)
 
@@ -70,8 +62,7 @@ def get_last_week(user):
 
 @cachetools.func.ttl_cache(maxsize=128, ttl=60 * 9)
 def get_weekly_payment(user):
-    client = RestClient(user)
-    data = client.get_to_pay("sales", week=True).json()
+    data = get_bought_products(user, week=True, flag=0)
     payment = sum((x["forPay"]) for x in data)
     return int(payment)
 
@@ -100,13 +91,13 @@ def get_ordered_products(user):
 
 
 @cachetools.func.ttl_cache(maxsize=128, ttl=60 * 13)
-def get_bought_products(user, week=False):
+def get_bought_products(user, week=False, flag=1):
     client = RestClient(user)
-    data = client.get_ordered(url="sales", week=week)
+    data = client.get_ordered(url="sales", week=week, flag=flag)
     while data.status_code != 200:
         logging.warning("WB endpoint is faulty. Retrying...")
         time.sleep(RETRY_DELAY)
-        data = client.get_ordered(url="sales", week=week)
+        data = client.get_ordered(url="sales", week=week, flag=flag)
     return data.json()
 
 
