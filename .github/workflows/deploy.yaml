@@ -24,22 +24,7 @@ jobs:
 
       - name: Install latest version of docker with experimental compose support
         run: |
-          curl -L https://raw.githubusercontent.com/docker/compose-cli/main/scripts/install/install_linux.sh | sh
           pip install docker-compose
-
-      - name: Add environment variables
-        run: |
-          touch .env
-          echo DB_ENGINE=${{ secrets.DB_ENGINE }} >> .env
-          echo DB_NAME=${{ secrets.DB_NAME }} >> .env
-          echo POSTGRES_USER=${{ secrets.POSTGRES_USER }} >> .env
-          echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> .env
-          echo DB_HOST=${{ secrets.DB_HOST }} >> .env
-          echo DB_PORT=${{ secrets.DB_PORT }} >> .env
-          echo SECRET_KEY=${{ secrets.SECRET_KEY }} >> .env
-          echo DJANGO_SUPERUSER_PASSWORD=${{ secrets.DJANGO_SUPERUSER_PASSWORD }} >> .env
-          echo DJANGO_SUPERUSER_EMAIL=${{ secrets.DJANGO_SUPERUSER_EMAIL }} >> .env
-          echo DJANGO_SUPERUSER_USERNAME=${{ secrets.DJANGO_SUPERUSER_USERNAME }} >> .env
 
       - name: Remote docker compose down/up using context (zero files)
         run: |
