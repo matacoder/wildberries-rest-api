@@ -28,7 +28,6 @@ jobs:
   magic_deploy:
     name: Deploy to server with remote docker-compose
     runs-on: ubuntu-latest
-    needs: build_and_push_to_docker_hub
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python
