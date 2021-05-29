@@ -26,6 +26,10 @@ jobs:
         run: |
           pip install docker-compose
 
+      - name: Add environment variables
+        run: |
+          echo ${{ secrets.ENV }} | base64 -d > .env
+
       - name: Remote docker compose down/up using context (zero files)
         run: |
           docker context create remote --docker "host=ssh://${{ secrets.SSH_USER }}@${{ secrets.IP_HOST }}"

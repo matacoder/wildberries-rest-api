@@ -7,3 +7,4 @@ static/admin/*
 !static/.gitkeep
 /.idea/
 .env
+.env.prod
