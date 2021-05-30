@@ -25,14 +25,15 @@
                                 <input type="hidden" id="wb_id" name="wb_id" value="{{ wb_id }}">
                                 <input type="hidden" id="sku" name="sku" value="{{ info.sku }}">
                                 <input type="hidden" id="size" name="size" value="{{ key }}">
-                                <p class="control">{{ key }} ({{ value }})</p>
+                                <input type="hidden" id="update" name="update" value="True">
+                                <p class="control">Size {{ key }}:</p>
                                 <p class="control is-expanded">
                                     <input class="input" type="text"
-                                           value="-{{ value }}" id="qty"
+                                           value="{{ value }}" id="qty"
                                            name="qty">
                                 </p>
                                 <p class="control">
-                                    <input class="button is-info" type="submit" value="Delete">
+                                    <input class="button is-info" type="submit" value="Save">
                                 </p>
                             </form>
 

@@ -1,4 +1,4 @@
-name: Wildberris workflow
+name: Wildberries workflow
 
 on:
   push:

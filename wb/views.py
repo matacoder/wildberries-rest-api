@@ -7,9 +7,14 @@ from django.http import HttpResponse
 from django.shortcuts import render
 
 from wb.forms import ApiForm
-from wb.services import (get_bought_products, get_bought_sum,
-                         get_ordered_products, get_ordered_sum,
-                         get_stock_products, get_weekly_payment)
+from wb.services import (
+    get_bought_products,
+    get_bought_sum,
+    get_ordered_products,
+    get_ordered_sum,
+    get_stock_products,
+    get_weekly_payment,
+)
 
 
 def index(request):
@@ -134,14 +139,23 @@ def add_to_cart(request):
     qty = request.GET.get("qty")
     sku = request.GET.get("sku")
     size = request.GET.get("size")
+    update = request.GET.get("update", False)
     logging.warning(sku)
 
     item = cart.get(wb_id, dict())
     item["sku"] = sku
     sizes = item.get("sizes", dict())
-    sizes[size] = sizes.get(size, 0) + int(qty)
-    item["sizes"] = sizes
-    cart[wb_id] = item
+    if update:
+        sizes[size] = int(qty)
+    else:
+        sizes[size] = sizes.get(size, 0) + int(qty)
+    if sizes[size] == 0:
+        sizes.pop(size, None)
+    if not sizes:
+        cart.pop(wb_id, None)
+    else:
+        item["sizes"] = sizes
+        cart[wb_id] = item
 
     request.session["json_cart2"] = json.dumps(cart)
     return HttpResponse(len(cart))
