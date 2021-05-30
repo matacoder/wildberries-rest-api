@@ -17,3 +17,8 @@ def get_image_url(wb_id):
 def get_cart(request):
     cart = json.loads(request.session.get("json_cart", '{}'))
     return len(cart)
+
+
+@register.simple_tag
+def get_diff(total, stock):
+    return total - stock if total - stock > 0 else 0

@@ -138,4 +138,4 @@ def add_to_cart(request):
     qty = request.GET.get("qty")
     cart[wb_id] = cart.get(wb_id, 0) + int(qty)
     request.session["json_cart"] = json.dumps(cart)
-    return HttpResponse(json.dumps(cart))
+    return HttpResponse(len(cart))
