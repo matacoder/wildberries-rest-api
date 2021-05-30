@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block title %}WB API REST{% endblock %}
+
+{% block content %}
+    {% load custom_tags %}
+    {% include 'includes/revenue.html' %}
+    <br/>
+    <h1 class="title">
+        Warehouse stock
+    </h1>
+    {% include "includes/summary_card.html" %}
+
+{% endblock %}

@@ -5,14 +5,9 @@ from django.core.paginator import Paginator
 from django.shortcuts import render
 
 from wb.forms import ApiForm
-from wb.services import (
-    get_bought_products,
-    get_bought_sum,
-    get_ordered_products,
-    get_ordered_sum,
-    get_stock_products,
-    get_weekly_payment,
-)
+from wb.services import (get_bought_products, get_bought_sum,
+                         get_ordered_products, get_ordered_sum,
+                         get_stock_products, get_weekly_payment)
 
 
 def index(request):
@@ -79,3 +74,38 @@ def api(request):
         form.instance.user = request.user
         form.save()
     return render(request, "api.html", {"form": form})
+
+
+def weekly_orders_summary(request):
+    data = get_ordered_products(user=request.user, week=True, flag=0)
+    combined = dict()
+    # logging.warning(data)
+    for item in data:
+        wb_id = item["nmId"]
+        sku = item["supplierArticle"]
+        size = item["techSize"]
+        qty = item["quantity"]
+        if wb_id not in combined:
+            combined[wb_id] = {
+                "sizes": {size: qty},
+                "total": qty,
+                "sku": sku,
+            }
+        else:
+            editing = combined[wb_id]  # this is pointer to object in memory
+            editing["sizes"][size] = editing["sizes"].get(size, 0) + qty
+            editing["total"] += qty
+    # logging.warning(combined)
+    unsorted_data = tuple(combined.items())
+    sorted_data = sorted(unsorted_data, key=lambda x: x[1]["total"], reverse=True)
+    paginator = Paginator(sorted_data, 32)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+    data = get_info_widget(request.user)
+    data["data"] = page_obj
+
+    return render(
+        request,
+        "summary.html",
+        data,
+    )

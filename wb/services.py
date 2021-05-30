@@ -80,13 +80,13 @@ def get_bought_sum(user):
 
 
 @cachetools.func.ttl_cache(maxsize=128, ttl=60 * 12)
-def get_ordered_products(user):
+def get_ordered_products(user, week=False, flag=1):
     client = RestClient(user)
-    data = client.get_ordered(url="orders")
+    data = client.get_ordered(url="orders", week=week, flag=flag)
     while data.status_code != 200:
         logging.warning("WB endpoint is faulty. Retrying...")
         time.sleep(RETRY_DELAY)
-        data = client.get_ordered(url="orders")
+        data = client.get_ordered(url="orders", week=week, flag=flag)
     return data.json()
 
 
