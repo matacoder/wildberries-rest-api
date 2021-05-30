@@ -16,7 +16,27 @@
                         Open on WB
                     </a>
                     <div class="content">
-                    {{ info.sku }}: {{ info.total }} pcs.
+                        {{ info.sku }}: <br/>
+                        SOLD {{ info.total }}; STOCK: {{ info.stock }} <br/>
+                        {% if info.stock == 0 %}
+                            <div class="block">
+                                  <span class="tag is-danger">
+                                    Out of stock
+                                  </span>
+                            </div>
+                        {% elif info.stock <= info.total %}
+                            <div class="block">
+                                  <span class="tag is-warning">
+                                    Less than a week
+                                  </span>
+                            </div>
+                        {% else %}
+                            <div class="block">
+                                  <span class="tag is-success">
+                                    Enough
+                                  </span>
+                            </div>
+                        {% endif %}
                         {% for key, value in info.sizes.items %}
                             {{ key }}: {{ value }},
                         {% endfor %}

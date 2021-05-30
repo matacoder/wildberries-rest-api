@@ -5,9 +5,14 @@ from django.core.paginator import Paginator
 from django.shortcuts import render
 
 from wb.forms import ApiForm
-from wb.services import (get_bought_products, get_bought_sum,
-                         get_ordered_products, get_ordered_sum,
-                         get_stock_products, get_weekly_payment)
+from wb.services import (
+    get_bought_products,
+    get_bought_sum,
+    get_ordered_products,
+    get_ordered_sum,
+    get_stock_products,
+    get_weekly_payment,
+)
 
 
 def index(request):
@@ -80,6 +85,7 @@ def weekly_orders_summary(request):
     data = get_ordered_products(user=request.user, week=True, flag=0)
     combined = dict()
     # logging.warning(data)
+    stock = get_stock_as_dict(request)
     for item in data:
         wb_id = item["nmId"]
         sku = item["supplierArticle"]
@@ -90,6 +96,7 @@ def weekly_orders_summary(request):
                 "sizes": {size: qty},
                 "total": qty,
                 "sku": sku,
+                "stock": stock.get(wb_id, None),
             }
         else:
             editing = combined[wb_id]  # this is pointer to object in memory
@@ -109,3 +116,8 @@ def weekly_orders_summary(request):
         "summary.html",
         data,
     )
+
+
+def get_stock_as_dict(request):
+    data = get_stock_products(user=request.user)
+    return {x["nmId"]: x["quantity"] for x in data}
