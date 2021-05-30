@@ -82,7 +82,7 @@ def api(request):
 
 
 def weekly_orders_summary(request):
-    data = get_ordered_products(user=request.user, week=True, flag=0)
+    data = get_ordered_products(user=request.user, week=False, flag=0, days=14)
     combined = dict()
     # logging.warning(data)
     stock = get_stock_as_dict(request)
@@ -120,4 +120,9 @@ def weekly_orders_summary(request):
 
 def get_stock_as_dict(request):
     data = get_stock_products(user=request.user)
-    return {x["nmId"]: x["quantity"] for x in data}
+    stock_as_dict = dict()
+    for x in data:
+        key = x["nmId"]
+        stock_as_dict[key] = stock_as_dict.get(key, 0) + x["quantity"]
+
+    return stock_as_dict

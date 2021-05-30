@@ -16,9 +16,11 @@ class RestClient:
         self.base_url = "https://suppliers-stats.wildberries.ru/api/v1/supplier/"
 
     @staticmethod
-    def get_date(week=None):
+    def get_date(week=None, days=None):
         date = datetime.datetime.today()
-        if week:
+        if days:
+            date = date - datetime.timedelta(days=days)
+        elif week:
             date = date - datetime.timedelta(days=(date.weekday()))
         return date.strftime("%Y-%m-%dT00:00:00.000Z")
 
@@ -35,9 +37,9 @@ class RestClient:
         }
         return self.connect(params, self.base_url + "stocks")
 
-    def get_ordered(self, url, week=False, flag=1):
+    def get_ordered(self, url, week=False, flag=1, days=None):
         params = {
-            "dateFrom": self.get_date(week),
+            "dateFrom": self.get_date(week, days),
             "key": self.token,
             "flag": flag,
         }
@@ -80,13 +82,13 @@ def get_bought_sum(user):
 
 
 @cachetools.func.ttl_cache(maxsize=128, ttl=60 * 12)
-def get_ordered_products(user, week=False, flag=1):
+def get_ordered_products(user, week=False, flag=1, days=None):
     client = RestClient(user)
-    data = client.get_ordered(url="orders", week=week, flag=flag)
+    data = client.get_ordered(url="orders", week=week, flag=flag, days=days)
     while data.status_code != 200:
         logging.warning("WB endpoint is faulty. Retrying...")
         time.sleep(RETRY_DELAY)
-        data = client.get_ordered(url="orders", week=week, flag=flag)
+        data = client.get_ordered(url="orders", week=week, flag=flag, days=days)
     return data.json()
 
 
