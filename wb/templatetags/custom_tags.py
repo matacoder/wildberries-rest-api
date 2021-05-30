@@ -21,4 +21,6 @@ def get_cart(request):
 
 @register.simple_tag
 def get_diff(total, stock):
+    if stock is None or total is None:
+        stock = total = 0
     return total - stock if total - stock > 0 else 0
