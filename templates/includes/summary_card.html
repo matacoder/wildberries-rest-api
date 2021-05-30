@@ -40,6 +40,16 @@
                         {% for key, value in info.sizes.items %}
                             {{ key }}: {{ value }},
                         {% endfor %}
+
+                        <form class="field is-grouped" action={% url "add" %}>
+                            <input type="hidden" id="wb_id" name="wb_id" value="{{ wb_id }}">
+                            <p class="control is-expanded">
+                                <input class="input" type="text" value="1" id="qty" name="qty">
+                            </p>
+                            <p class="control">
+                                <input class="button is-info" type="submit" value="Add">
+                            </p>
+                        </form>
                     </div>
                 </div>
             </div>

@@ -9,3 +9,8 @@ def get_image_url(wb_id):
     end_url = "-1.jpg"
     wb_id_with_nulls = str(wb_id)[:-4] + "0000/"
     return base_url + wb_id_with_nulls + str(wb_id) + end_url
+
+
+@register.simple_tag
+def get_cart(request):
+    pass

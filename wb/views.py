@@ -1,7 +1,9 @@
+import json
 import logging
 
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
+from django.http import HttpResponse
 from django.shortcuts import render
 
 from wb.forms import ApiForm
@@ -81,6 +83,7 @@ def api(request):
     return render(request, "api.html", {"form": form})
 
 
+@login_required
 def weekly_orders_summary(request):
     data = get_ordered_products(user=request.user, week=False, flag=0, days=14)
     combined = dict()
@@ -126,3 +129,13 @@ def get_stock_as_dict(request):
         stock_as_dict[key] = stock_as_dict.get(key, 0) + x["quantity"]
 
     return stock_as_dict
+
+
+@login_required
+def add_to_cart(request):
+    cart = json.loads(request.session.get("json_cart", '{}'))
+    wb_id = request.GET.get("wb_id")
+    qty = request.GET.get("qty")
+    cart[wb_id] = cart.get(wb_id, 0) + int(qty)
+    request.session["json_cart"] = json.dumps(cart)
+    return HttpResponse(json.dumps(cart))
