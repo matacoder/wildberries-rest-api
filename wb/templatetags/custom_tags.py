@@ -15,7 +15,7 @@ def get_image_url(wb_id):
 
 @register.simple_tag
 def get_cart(request):
-    cart = json.loads(request.session.get("json_cart", '{}'))
+    cart = json.loads(request.session.get("json_cart", "{}"))
     return len(cart)
 
 

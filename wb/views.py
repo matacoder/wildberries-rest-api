@@ -7,14 +7,9 @@ from django.http import HttpResponse
 from django.shortcuts import render
 
 from wb.forms import ApiForm
-from wb.services import (
-    get_bought_products,
-    get_bought_sum,
-    get_ordered_products,
-    get_ordered_sum,
-    get_stock_products,
-    get_weekly_payment,
-)
+from wb.services import (get_bought_products, get_bought_sum,
+                         get_ordered_products, get_ordered_sum,
+                         get_stock_products, get_weekly_payment)
 
 
 def index(request):
@@ -133,9 +128,39 @@ def get_stock_as_dict(request):
 
 @login_required
 def add_to_cart(request):
-    cart = json.loads(request.session.get("json_cart", '{}'))
+    cart = json.loads(request.session.get("json_cart2", "{}"))
+
     wb_id = request.GET.get("wb_id")
     qty = request.GET.get("qty")
-    cart[wb_id] = cart.get(wb_id, 0) + int(qty)
-    request.session["json_cart"] = json.dumps(cart)
+    sku = request.GET.get("sku")
+    size = request.GET.get("size")
+    logging.warning(sku)
+
+    item = cart.get(wb_id, dict())
+    item["sku"] = sku
+    sizes = item.get("sizes", dict())
+    sizes[size] = sizes.get(size, 0) + int(qty)
+    item["sizes"] = sizes
+    cart[wb_id] = item
+
+    request.session["json_cart2"] = json.dumps(cart)
     return HttpResponse(len(cart))
+
+
+@login_required
+def cart(request):
+    cart = json.loads(request.session.get("json_cart2", "{}"))
+    logging.warning(cart)
+    cart = tuple(cart.items())
+    logging.warning(cart)
+    paginator = Paginator(cart, 32)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+    data = get_info_widget(request.user)
+    data["data"] = page_obj
+
+    return render(
+        request,
+        "cart.html",
+        data,
+    )

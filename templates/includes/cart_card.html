@@ -1,0 +1,48 @@
+{% load custom_tags %}
+<br/>
+<div class="columns is-multiline is-mobile has-text-centered">
+    <!-- section1 -->
+    {% for wb_id, info in data %}
+        <div class="column is-3-tablet is-6-mobile">
+            <div class="card">
+                <div class="card-image">
+                    <figure class="image is-3by4">
+                        <img src="{% get_image_url wb_id %}"/>
+                    </figure>
+                </div>
+                <div class="card-content">
+                    <a target="_blank"
+                       href="https://www.wildberries.ru/catalog/{{ wb_id }}/detail.aspx?targetUrl=ES">
+                        Open on WB
+                    </a>
+                    <div class="content">
+                        {{ info.sku }}: <br/>
+
+                        {% for key, value in info.sizes.items %}
+                            <form hx-get="/add/"
+                                  hx-target="#cart"
+                                  class="field is-grouped">
+                                <input type="hidden" id="wb_id" name="wb_id" value="{{ wb_id }}">
+                                <input type="hidden" id="sku" name="sku" value="{{ info.sku }}">
+                                <input type="hidden" id="size" name="size" value="{{ key }}">
+                                <p class="control">{{ key }} ({{ value }})</p>
+                                <p class="control is-expanded">
+                                    <input class="input" type="text"
+                                           value="-{{ value }}" id="qty"
+                                           name="qty">
+                                </p>
+                                <p class="control">
+                                    <input class="button is-info" type="submit" value="Delete">
+                                </p>
+                            </form>
+
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+
+</div>
+<br/>
+{% include 'includes/pages.html' %}
