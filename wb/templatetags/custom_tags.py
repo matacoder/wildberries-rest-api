@@ -1,3 +1,5 @@
+import json
+
 from django import template
 
 register = template.Library()
@@ -13,4 +15,5 @@ def get_image_url(wb_id):
 
 @register.simple_tag
 def get_cart(request):
-    pass
+    cart = json.loads(request.session.get("json_cart", '{}'))
+    return len(cart)
