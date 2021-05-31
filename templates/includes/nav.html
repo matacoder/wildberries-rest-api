@@ -1,36 +1,37 @@
 {% load custom_tags %}
 <nav class="navbar" role="navigation" aria-label="main navigation">
-    <div class="navbar-brand">
-        <a class="navbar-item" href="{% url 'index' %}">
-            <h1>WB API Client</h1>
-        </a>
 
-    </div>
 
     <div id="navbarBasicExample" class="navbar-menu  is-active">
         <div class="navbar-start">
+            <div class="navbar-item">
+                <div class="buttons">
 
 
-            <a class="navbar-item" href="{% url 'stock' %}">
-                In Stock
-            </a>
+                    <a class="button is-link" href="{% url 'index' %}">
+                        WB
+                    </a>
+                    <a class="button is-primary is-light" href="{% url 'stock' %}">
+                        Склад
+                    </a>
 
-            <a class="navbar-item" href="{% url 'ordered' %}">
-                Ordered
-            </a>
-            <a class="navbar-item" href="{% url 'bought' %}">
-                Bought
-            </a>
-            <a class="navbar-item" href="{% url 'summary' %}">
-                Summary
-            </a>
-            <a class="navbar-item"  href="{% url 'cart' %}">
-                Cart (<span id="cart">{% get_cart request %}</span>)
-            </a>
+                    <a class="button is-primary is-light" href="{% url 'ordered' %}">
+                        Заказали
+                    </a>
 
+                    <a class="button is-primary is-light" href="{% url 'bought' %}">
+                        Купили
+                    </a>
+                    <a class="button is-primary is-light" href="{% url 'summary' %}">
+                        Аналитика
+                    </a>
+                    <a class="button is-primary" href="{% url 'cart' %}">
+                        Корзина (<span id="cart">{% get_cart request %}</span>)
+                    </a>
 
+                </div>
+            </div>
         </div>
-
         <div class="navbar-end">
             <div class="navbar-item">
                 <div class="buttons">
