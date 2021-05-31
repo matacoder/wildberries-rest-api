@@ -170,7 +170,7 @@ def cart(request):
     paginator = Paginator(cart, 32)
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
-    data = get_info_widget(request.user)
+    data = dict()
     data["data"] = page_obj
 
     return render(
