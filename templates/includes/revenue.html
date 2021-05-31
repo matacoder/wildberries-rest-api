@@ -1,19 +1,19 @@
-<div class="columns">
-    <div class="column">
+<div class="buttons">
 
-        <div class="notification is-primary is-light">
-            Ordered: <strong>{{ ordered }}</strong> rub.
-        </div>
-    </div>
-    <div class="column">
-        <div class="notification is-success is-light">
-            Bought: <strong>{{ bought }}</strong> rub.
-        </div>
-    </div>
-    <div class="column">
-        <div class="notification is-warning is-light">
-            Weekly payment: <strong>{{ payment }}</strong> rub.
-        </div>
-    </div>
+
+        <a class="button is-primary is-light" href="{% url "ordered" %}">
+            Заказали: <strong>{{ ordered }}</strong> ₽
+        </a>
+
+
+        <a class="button is-success is-light" href="{% url "bought" %}">
+            Выкупили: <strong>{{ bought }}</strong> ₽
+        </a>
+
+
+        <a class="button is-warning is-light" href="{% url "summary" %}">
+            Недельная выплата: <strong>{{ payment }}</strong> ₽
+        </a>
+
 
 </div>

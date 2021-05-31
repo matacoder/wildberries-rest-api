@@ -46,7 +46,7 @@
                                 <input type="hidden" id="wb_id" name="wb_id" value="{{ wb_id }}">
                                 <input type="hidden" id="sku" name="sku" value="{{ info.sku }}">
                                 <input type="hidden" id="size" name="size" value="{{ key }}">
-                                <p class="is-small">{{ value }} left </p>
+                                <p class="is-small">{{ value }} sold </p>
                                 <p class="control is-expanded">
                                     <input class="input is-small" type="text"
                                            value="{% get_diff info.total info.stock %}" id="qty"
