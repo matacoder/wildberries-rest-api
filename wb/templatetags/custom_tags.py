@@ -24,3 +24,8 @@ def get_diff(total, stock):
     if stock is None or total is None:
         stock = total = 0
     return total - stock if total - stock > 0 else 0
+
+
+@register.filter
+def sort_keys(dict_to_sort):
+    return sorted(dict_to_sort)
