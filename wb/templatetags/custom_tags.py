@@ -29,3 +29,10 @@ def get_diff(total, stock):
 @register.filter
 def sort_keys(dict_to_sort):
     return sorted(dict_to_sort)
+
+
+@register.simple_tag
+def url_replace(request, field, value):
+    dict_ = request.GET.copy()
+    dict_[field] = value
+    return dict_.urlencode()

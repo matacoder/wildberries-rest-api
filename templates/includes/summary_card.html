@@ -21,19 +21,19 @@
                         {% if info.stock == 0 %}
                             <div class="block">
                                   <span class="tag is-danger">
-                                    Out of stock
+                                    Нет на складе
                                   </span>
                             </div>
-                        {% elif info.stock <= info.total %}
+                        {% elif info.stock < info.total %}
                             <div class="block">
                                   <span class="tag is-warning">
-                                    Less than a week
+                                    Пора заказывать
                                   </span>
                             </div>
                         {% else %}
                             <div class="block">
                                   <span class="tag is-success">
-                                    Enough
+                                    Достаточно
                                   </span>
                             </div>
                         {% endif %}

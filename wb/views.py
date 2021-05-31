@@ -87,7 +87,7 @@ def api(request):
 def weekly_orders_summary(request):
     data = get_ordered_products(user=request.user, week=False, flag=0, days=14)
     combined = dict()
-
+    to_order = request.GET.get("to_order", False)
     stock = get_stock_as_dict(request)
     for item in data:
 
@@ -111,6 +111,8 @@ def weekly_orders_summary(request):
 
     unsorted_data = tuple(combined.items())
     sorted_data = sorted(unsorted_data, key=lambda x: x[1]["total"], reverse=True)
+    if to_order:
+        sorted_data = tuple(filter(lambda x: x[1]["total"] > x[1]["stock"], sorted_data))
     paginator = Paginator(sorted_data, 32)
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
