@@ -87,25 +87,28 @@ def api(request):
 def weekly_orders_summary(request):
     data = get_ordered_products(user=request.user, week=False, flag=0, days=14)
     combined = dict()
-    # logging.warning(data)
+
     stock = get_stock_as_dict(request)
     for item in data:
+
         wb_id = item["nmId"]
         sku = item["supplierArticle"]
         size = item["techSize"]
         qty = item["quantity"]
+        stock_data = stock.get(wb_id, {"stock": 0})
+
         if wb_id not in combined:
             combined[wb_id] = {
                 "sizes": {size: qty},
                 "total": qty,
                 "sku": sku,
-                "stock": stock.get(wb_id, None),
+                "stock": stock_data.get("stock", 0),
             }
         else:
             editing = combined[wb_id]  # this is pointer to object in memory
             editing["sizes"][size] = editing["sizes"].get(size, 0) + qty
             editing["total"] += qty
-    # logging.warning(combined)
+
     unsorted_data = tuple(combined.items())
     sorted_data = sorted(unsorted_data, key=lambda x: x[1]["total"], reverse=True)
     paginator = Paginator(sorted_data, 32)
@@ -122,11 +125,30 @@ def weekly_orders_summary(request):
 
 
 def get_stock_as_dict(request):
-    data = get_stock_products(user=request.user)
+    stock = get_stock_products(user=request.user)
     stock_as_dict = dict()
-    for x in data:
-        key = x["nmId"]
-        stock_as_dict[key] = stock_as_dict.get(key, 0) + x["quantity"]
+    for item in stock:
+        key = item["nmId"]
+        price = int(item["Price"] * ((100 - item["Discount"]) / 100))
+        data = {
+            "wb_id": item["nmId"],
+            "sku": item["supplierArticle"],
+            "price": price,
+        }
+        data = stock_as_dict.get(key, data)
+
+        data["in"] = data.get("in", 0) + item["inWayToClient"]
+        data["out"] = data.get("out", 0) + item["inWayFromClient"]
+        data["stock"] = data.get("stock", 0) + item["quantityFull"]
+
+        sizes = data.get("sizes", dict())
+        size = item["techSize"]
+        sizes[size] = sizes.get(size, 0) + item["quantityFull"]
+
+        data["sizes"] = sizes
+        stock_as_dict[key] = data
+
+    logging.warning(stock_as_dict.get(11034009, None))
 
     return stock_as_dict
 
