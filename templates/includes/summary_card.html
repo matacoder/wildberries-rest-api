@@ -37,19 +37,19 @@
                                   </span>
                             </div>
                         {% endif %}
+
                         {% for key, value in info.sizes.items|sort_keys %}
-
-
+                        {% get_size_stock info.stock_sizes key as this_size %}
                             <form hx-get="/add/"
                                   hx-target="#cart"
                                   class="field is-grouped">
                                 <input type="hidden" id="wb_id" name="wb_id" value="{{ wb_id }}">
                                 <input type="hidden" id="sku" name="sku" value="{{ info.sku }}">
                                 <input type="hidden" id="size" name="size" value="{{ key }}">
-                                <p class="is-small">{{ value }} sold </p>
+                                <p class="is-small">{{ value }}/{{ this_size }} </p>
                                 <p class="control is-expanded">
                                     <input class="input is-small" type="text"
-                                           value="{% get_diff info.total info.stock %}" id="qty"
+                                           value="{% get_diff value this_size %}" id="qty"
                                            name="qty">
                                 </p>
                                 <p class="control">

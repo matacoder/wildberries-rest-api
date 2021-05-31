@@ -1,4 +1,5 @@
 import json
+import logging
 
 from django import template
 
@@ -29,6 +30,11 @@ def get_diff(total, stock):
 @register.filter
 def sort_keys(dict_to_sort):
     return sorted(dict_to_sort)
+
+
+@register.simple_tag
+def get_size_stock(sizes_dict, key):
+    return sizes_dict[0].get(key, 0)
 
 
 @register.simple_tag

@@ -103,11 +103,13 @@ def weekly_orders_summary(request):
                 "total": qty,
                 "sku": sku,
                 "stock": stock_data.get("stock", 0),
+                "stock_sizes": stock_data.get("sizes", dict()),
             }
         else:
             editing = combined[wb_id]  # this is pointer to object in memory
             editing["sizes"][size] = editing["sizes"].get(size, 0) + qty
             editing["total"] += qty
+            editing["stock_sizes"] = stock_data.get("sizes", dict()),
 
     unsorted_data = tuple(combined.items())
     sorted_data = sorted(unsorted_data, key=lambda x: x[1]["total"], reverse=True)
