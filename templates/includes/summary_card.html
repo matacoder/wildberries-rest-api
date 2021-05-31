@@ -13,11 +13,11 @@
                 <div class="card-content">
                     <a target="_blank"
                        href="https://www.wildberries.ru/catalog/{{ wb_id }}/detail.aspx?targetUrl=ES">
-                        Open on WB
+                        Смотреть на сайте
                     </a>
                     <div class="content is-small">
                         {{ info.sku }}: <br/>
-                        SOLD {{ info.total }}; STOCK: {{ info.stock }} <br/>
+                        Заказы {{ info.total }}; Склад: {{ info.stock }} <br/>
                         {% if info.stock == 0 %}
                             <div class="block">
                                   <span class="tag is-danger">
@@ -39,21 +39,22 @@
                         {% endif %}
 
                         {% for key, value in info.sizes.items|sort_keys %}
-                        {% get_size_stock info.stock_sizes key as this_size %}
+                            {% get_size_stock info.stock_sizes key as this_size %}
                             <form hx-get="/add/"
                                   hx-target="#cart"
                                   class="field is-grouped">
                                 <input type="hidden" id="wb_id" name="wb_id" value="{{ wb_id }}">
                                 <input type="hidden" id="sku" name="sku" value="{{ info.sku }}">
                                 <input type="hidden" id="size" name="size" value="{{ key }}">
-                                <p class="is-small">{{ value }}/{{ this_size }} </p>
+                                <p class="is-small">зак:{{ value }} скл:{{ this_size }} </p>
                                 <p class="control is-expanded">
                                     <input class="input is-small" type="text"
                                            value="{% get_diff value this_size %}" id="qty"
                                            name="qty">
                                 </p>
                                 <p class="control">
-                                    <input class="button is-info is-small" type="submit" value="{% if key == "0" %}+{% else %}{{ key }}{% endif %}">
+                                    <input class="button is-info is-small" type="submit"
+                                           value="{% if key == "0" %}+{% else %}{{ key }}{% endif %}">
                                 </p>
                             </form>
                         {% endfor %}
