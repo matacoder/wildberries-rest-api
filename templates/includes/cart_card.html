@@ -28,12 +28,12 @@
                                 <input type="hidden" id="update" name="update" value="True">
 
                                 <p class="control is-expanded">
-                                    <input class="input" type="text"
+                                    <input class="input is-small" type="text"
                                            value="{{ value }}" id="qty"
                                            name="qty">
                                 </p>
                                 <p class="control">
-                                    <input class="button is-info" type="submit" value="{% if key == "0" %}✓{% else %}{{ key }}{% endif %}">
+                                    <input class="button is-info is-small" type="submit" value="{% if key == "0" %}✓{% else %}{{ key }} размер{% endif %}">
                                 </p>
                             </form>
 

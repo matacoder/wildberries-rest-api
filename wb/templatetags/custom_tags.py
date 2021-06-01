@@ -34,7 +34,11 @@ def sort_keys(dict_to_sort):
 
 @register.simple_tag
 def get_size_stock(sizes_dict, key):
-    return sizes_dict[0].get(key, 0)
+    try:
+        return sizes_dict[0].get(key, 0)
+    except KeyError:
+        return 0
+
 
 
 @register.simple_tag

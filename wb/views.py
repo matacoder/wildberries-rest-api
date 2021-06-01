@@ -146,7 +146,7 @@ def get_stock_as_dict(request):
         data["stock"] = data.get("stock", 0) + item["quantityFull"]
 
         sizes = data.get("sizes", dict())
-        size = item["techSize"]
+        size = item.get("techSize", 0)
         sizes[size] = sizes.get(size, 0) + item["quantityFull"]
 
         data["sizes"] = sizes
