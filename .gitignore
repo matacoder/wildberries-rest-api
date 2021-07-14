@@ -8,3 +8,4 @@ static/admin/*
 /.idea/
 .env
 .env.prod
+/static/debug_toolbar/

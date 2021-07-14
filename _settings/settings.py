@@ -25,12 +25,19 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get("DEBUG")
 
 ALLOWED_HOSTS = ["wb.matakov.com", "127.0.0.1"]
 
+INTERNAL_IPS = [
+    '127.0.0.1',
+]
 
 # Application definition
+
+DEBUG_TOOLBAR_CONFIG = {
+    'SHOW_TOOLBAR_CALLBACK': lambda request: not request.is_ajax(),
+}
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -41,11 +48,13 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "accounts",
     "wb",
+    'debug_toolbar',
 ]
 
 LOGIN_REDIRECT_URL = "/api/"
 
 MIDDLEWARE = [
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -53,6 +62,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+
 ]
 
 ROOT_URLCONF = "_settings.urls"
