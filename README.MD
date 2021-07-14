@@ -14,7 +14,7 @@ Live version is here: [wb.matakov.com](https://wb.matakov.com)
 - Cart
 - What to buy next analysis
 
-## How to test
+## How to test:
 
 1) Register
 2) Set up your API KEY
