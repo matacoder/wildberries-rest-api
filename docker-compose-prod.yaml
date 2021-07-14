@@ -16,7 +16,7 @@ services:
     env_file:
       - ./.env
   django:
-    build: .
+    image: matakov/wb:latest
     depends_on:
       - db
     restart: always
@@ -27,6 +27,8 @@ services:
       - media:/code/media
       - nginx_conf:/code/nginx/
     entrypoint: /code/entrypoint.sh
+    environment:
+      - DEBUG=0
 
   nginx:
     image: nginx:1.19.0-alpine

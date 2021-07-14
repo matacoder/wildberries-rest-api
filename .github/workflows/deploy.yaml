@@ -37,8 +37,9 @@ jobs:
           docker context create remote --docker "host=ssh://${{ secrets.SSH_USER }}@${{ secrets.IP_HOST }}"
           docker context use remote
           docker image prune -f
+          docker build -t matakov/wb:latest .
           docker-compose --context remote -f docker-compose-prod.yaml down
-          docker-compose --context remote -f docker-compose-prod.yaml up -d --build --force-recreate
+          docker-compose --context remote -f docker-compose-prod.yaml up -d --force-recreate
 
   send_message:
     name: Send telegram notification

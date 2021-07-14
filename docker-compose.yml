@@ -21,8 +21,9 @@ services:
       - ./.env
     volumes:
       - .:/code/
-
     entrypoint: /code/entrypoint.sh
+    environment:
+      - DEBUG=1
 
   nginx:
     image: nginx:1.19.0-alpine
