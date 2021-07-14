@@ -35,9 +35,11 @@ INTERNAL_IPS = [
 
 # Application definition
 
-DEBUG_TOOLBAR_CONFIG = {
-    'SHOW_TOOLBAR_CALLBACK': lambda request: not request.is_ajax(),
-}
+if DEBUG:
+    DEBUG_TOOLBAR_CONFIG = {
+        "SHOW_TOOLBAR_CALLBACK": lambda request: not request.is_ajax(),
+    }
+
 
 INSTALLED_APPS = [
     "django.contrib.admin",
