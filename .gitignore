@@ -9,3 +9,4 @@ static/admin/*
 .env
 .env.prod
 /static/debug_toolbar/
+/static/bulma/
