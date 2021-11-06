@@ -1,13 +1,26 @@
 import datetime
+import functools
 import logging
 import time
 
 import cachetools.func
 import requests
+from django.shortcuts import redirect
 
 from wb.models import ApiKey
 
 RETRY_DELAY = 0.1
+
+
+def api_key_required(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        if ApiKey.objects.filter(user=args[0].user.id).exists():
+            return func(*args, **kwargs)
+        else:
+            return redirect("api")
+
+    return wrapper
 
 
 class RestClient:

@@ -99,6 +99,17 @@ argon2 = ["argon2-cffi (>=19.1.0)"]
 bcrypt = ["bcrypt"]
 
 [[package]]
+name = "django-bulma"
+version = "0.8.3"
+description = "Bulma CSS Framework for Django projects"
+category = "main"
+optional = false
+python-versions = ">=3.7"
+
+[package.dependencies]
+django = ">=2.2"
+
+[[package]]
 name = "django-debug-toolbar"
 version = "3.2.1"
 description = "A configurable set of panels that display various debug information about the current request/response."
@@ -222,7 +233,7 @@ socks = ["PySocks (>=1.5.6,!=1.5.7,<2.0)"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "93ea0639911355ec891a1ba73a48a0ad3e2eb4106c18c205e1dead9fa15c7f3f"
+content-hash = "0889b29ea5815861aa78c7f75ac46be29a46c9e91b7999496993d1590e35ab9a"
 
 [metadata.files]
 appdirs = [
@@ -260,6 +271,10 @@ colorama = [
 django = [
     {file = "Django-3.2.3-py3-none-any.whl", hash = "sha256:7e0a1393d18c16b503663752a8b6790880c5084412618990ce8a81cc908b4962"},
     {file = "Django-3.2.3.tar.gz", hash = "sha256:13ac78dbfd189532cad8f383a27e58e18b3d33f80009ceb476d7fcbfc5dcebd8"},
+]
+django-bulma = [
+    {file = "django-bulma-0.8.3.tar.gz", hash = "sha256:b794b4e64f482de77f376451f7cd8b3c8448eb68e5a24c51b9190625a08b0b30"},
+    {file = "django_bulma-0.8.3-py3-none-any.whl", hash = "sha256:0ef6e5c171c2a32010e724a8be61ba6cd0e55ebbd242cf6780560518483c4d00"},
 ]
 django-debug-toolbar = [
     {file = "django-debug-toolbar-3.2.1.tar.gz", hash = "sha256:a5ff2a54f24bf88286f9872836081078f4baa843dc3735ee88524e89f8821e33"},

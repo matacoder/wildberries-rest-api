@@ -1,13 +1,16 @@
-{% extends 'base.html' %}
-
-{% block title %}Sign Up{% endblock %}
-
+{% extends "base.html" %}
+{% block title %}Войти{% endblock %}
+{% block header %}Войти{% endblock %}
 {% block content %}
-<h2>Log In</h2>
-<form method="post">
-  {% csrf_token %}
-  {{ form.as_p }}
-  <button type="submit">Log In</button>
-</form>
-
+    {% load bulma_tags %}
+    <div class="box">
+        <form method="POST">
+            {% csrf_token %}
+            {{ form|bulma }}
+            <p class="block"><a href="{% url "password_reset" %}">Сбросить пароль</a></p>
+            <button type="submit" class="button">
+                Войти
+            </button>
+        </form>
+    </div>
 {% endblock %}

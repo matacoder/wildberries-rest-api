@@ -7,14 +7,10 @@ from django.http import HttpResponse
 from django.shortcuts import render
 
 from wb.forms import ApiForm
-from wb.services import (
-    get_bought_products,
-    get_bought_sum,
-    get_ordered_products,
-    get_ordered_sum,
-    get_stock_products,
-    get_weekly_payment,
-)
+from wb.models import ApiKey
+from wb.services import (api_key_required, get_bought_products, get_bought_sum,
+                         get_ordered_products, get_ordered_sum,
+                         get_stock_products, get_weekly_payment)
 
 
 def index(request):
@@ -22,6 +18,7 @@ def index(request):
 
 
 @login_required
+@api_key_required
 def stock(request):
     data = get_stock_products(user=request.user)
     in_stock = filter(lambda x: x["quantity"] > 0, data)
@@ -48,6 +45,7 @@ def get_info_widget(user):
 
 
 @login_required
+@api_key_required
 def ordered(request):
     return render_page(get_ordered_products, request)
 
@@ -70,6 +68,7 @@ def render_page(function, request):
 
 
 @login_required
+@api_key_required
 def bought(request):
     return render_page(get_bought_products, request)
 
@@ -77,13 +76,18 @@ def bought(request):
 @login_required
 def api(request):
     form = ApiForm(request.POST or None)
+    if ApiKey.objects.filter(user=request.user.id).exists():
+        api = ApiKey.objects.get(user=request.user.id)
+    else:
+        api = False
     if form.is_valid():
         form.instance.user = request.user
         form.save()
-    return render(request, "api.html", {"form": form})
+    return render(request, "api.html", {"form": form, "api": api})
 
 
 @login_required
+@api_key_required
 def weekly_orders_summary(request):
     data = get_ordered_products(user=request.user, week=False, flag=0, days=14)
     combined = dict()
@@ -109,12 +113,14 @@ def weekly_orders_summary(request):
             editing = combined[wb_id]  # this is pointer to object in memory
             editing["sizes"][size] = editing["sizes"].get(size, 0) + qty
             editing["total"] += qty
-            editing["stock_sizes"] = stock_data.get("sizes", dict()),
+            editing["stock_sizes"] = (stock_data.get("sizes", dict()),)
 
     unsorted_data = tuple(combined.items())
     sorted_data = sorted(unsorted_data, key=lambda x: x[1]["total"], reverse=True)
     if to_order:
-        sorted_data = tuple(filter(lambda x: x[1]["total"] > x[1]["stock"], sorted_data))
+        sorted_data = tuple(
+            filter(lambda x: x[1]["total"] > x[1]["stock"], sorted_data)
+        )
     paginator = Paginator(sorted_data, 32)
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
@@ -158,6 +164,7 @@ def get_stock_as_dict(request):
 
 
 @login_required
+@api_key_required
 def add_to_cart(request):
     cart = json.loads(request.session.get("json_cart2", "{}"))
 
@@ -188,6 +195,7 @@ def add_to_cart(request):
 
 
 @login_required
+@api_key_required
 def cart(request):
     cart = json.loads(request.session.get("json_cart2", "{}"))
     logging.warning(cart)

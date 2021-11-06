@@ -1,19 +1,19 @@
 <div class="buttons">
 
 
-        <a class="button is-primary is-light" href="{% url "ordered" %}">
-            Заказали: <strong>{{ ordered }}</strong> ₽
-        </a>
+    <a class="button is-primary is-light" href="{% url "ordered" %}">
+        Заказали:&nbsp<strong>{{ ordered }}</strong>&nbsp₽
+    </a>
 
 
-        <a class="button is-success is-light" href="{% url "bought" %}">
-            Выкупили: <strong>{{ bought }}</strong> ₽
-        </a>
+    <a class="button is-success is-light" href="{% url "bought" %}">
+        Выкупили:&nbsp<strong>{{ bought }}</strong>&nbsp₽
+    </a>
 
 
-        <a class="button is-warning is-light" href="{% url "summary" %}">
-            Недельная выплата: <strong>{{ payment }}</strong> ₽
-        </a>
+    <a class="button is-warning is-light" href="{% url "summary" %}">
+        Недельная выплата:&nbsp<strong>{{ payment }}</strong>&nbsp₽
+    </a>
 
 
 </div>

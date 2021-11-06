@@ -37,14 +37,14 @@
                 <div class="buttons">
                     {% if not user.is_authenticated %}
                         <a class="button is-primary" href="{% url 'signup' %}">
-                            <strong>Sign up</strong>
+                            <strong>Регистрация</strong>
                         </a>
                         <a class=" button is-light" href="{% url 'login' %}">
-                            Log in
+                            Войти
                         </a>
                     {% else %}
                         <a class="button is-primary" href="{% url 'api' %}">
-                            <strong>{{ user.username }}</strong>
+                            <strong>API ключ</strong>
                         </a>
                         <a class="button is-light" href="{% url 'logout' %}">Выйти</a>
                     {% endif %}

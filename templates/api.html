@@ -1,13 +1,21 @@
 {% extends 'base.html' %}
 
-{% block title %}Sign Up{% endblock %}
+{% block title %}Указать ключ - Вайлдберриз{% endblock %}
 
 {% block content %}
-<h2>Please enter your WB API KEY</h2>
-<form method="post">
-  {% csrf_token %}
-  {{ form.as_p }}
-  <button type="submit">Save</button>
-</form>
+    <div class="box">
+        {% load bulma_tags %}
+        <h2 class="title">Укажите ваш ключ API (x64)</h2>
+        <div class="block"><a href="https://seller.wb.ru/supplier-settings/access-to-api" target="_blank">Ссылка на
+            раздел ВБ с ключом</a></div>
+        {% if api %}
+        <div class="block">Указан ключ: <strong>{{ api }}</strong></div>
+        {% endif %}
+        <form method="post">
+            {% csrf_token %}
+            {{ form|bulma }}
+            <button class="button" type="submit">Сохранить</button>
+        </form>
+    </div>
 
 {% endblock %}
