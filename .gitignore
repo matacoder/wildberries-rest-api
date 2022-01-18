@@ -10,3 +10,4 @@ static/admin/*
 .env.prod
 /static/debug_toolbar/
 /static/bulma/
+/.env.rocket

@@ -23,11 +23,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get("SECRET_KEY")
+DOMAIN_PROD = os.environ.get("DOMAIN_PROD")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get("DEBUG") == "1"
 
-ALLOWED_HOSTS = ["wb.matakov.com", "127.0.0.1"]
+ALLOWED_HOSTS = ["wb.matakov.com", "127.0.0.1", DOMAIN_PROD]
 
 INTERNAL_IPS = [
     "127.0.0.1",
