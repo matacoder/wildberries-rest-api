@@ -12,7 +12,11 @@
 <section class="section">
 
     <div class="container">
-
+        <div class="notification is-danger is-light">
+        WB очень медленно отвечает на запросы по API (дольше 60 секунд). Поэтому сайт временно может медленно грузиться.
+            На нашей стороне все кешируется, поэтому долгая загрузка происходит
+            только в первый раз. Наберитесь терпения :)
+        </div>
         {% include "includes/nav.html" %}
         {% block content %}
 

@@ -1,11 +1,11 @@
 import datetime
 import functools
-import logging
 import time
 
 import cachetools.func
 import requests
 from django.shortcuts import redirect
+from loguru import logger
 
 from wb.models import ApiKey
 
@@ -40,10 +40,11 @@ class RestClient:
     @staticmethod
     def connect(params, server):
         response = requests.get(url=server, params=params)
-        logging.warning(f"{response.url}")
+        logger.info(f"URL WAS: {response.url}")
         return response
 
     def get_stock(self):
+        logger.info("Preparing url params for stocks...")
         params = {
             "dateFrom": self.get_date(),
             "key": self.token,
@@ -77,29 +78,48 @@ def get_last_week(user):
 
 @cachetools.func.ttl_cache(maxsize=128, ttl=60 * 9)
 def get_weekly_payment(user):
+    logger.info("Getting weekly payment...")
     data = get_bought_products(user, week=True, flag=0)
-    payment = sum((x["forPay"]) for x in data)
-    return int(payment)
+    if data:
+        payment = sum((x["forPay"]) for x in data)
+        return int(payment)
+    else:
+        return "WB error"
 
 
 @cachetools.func.ttl_cache(maxsize=128, ttl=60 * 10)
 def get_ordered_sum(user):
+    logger.info("Getting ordered payment...")
     data = get_ordered_products(user)
-    return int(sum((x["totalPrice"] * (1 - x["discountPercent"] / 100)) for x in data))
+    if data:
+        return int(
+            sum((x["totalPrice"] * (1 - x["discountPercent"] / 100)) for x in data)
+        )
+    else:
+        return "WB error"
 
 
 @cachetools.func.ttl_cache(maxsize=128, ttl=60 * 11)
 def get_bought_sum(user):
+    logger.info("Getting bought payment...")
     data = get_bought_products(user, week=False)
-    return int(sum((x["forPay"]) for x in data))
+    if data:
+        return int(sum((x["forPay"]) for x in data))
+    else:
+        return "WB error"
 
 
 @cachetools.func.ttl_cache(maxsize=128, ttl=60 * 12)
 def get_ordered_products(user, week=False, flag=1, days=None):
+
     client = RestClient(user)
     data = client.get_ordered(url="orders", week=week, flag=flag, days=days)
+    attempt = 0
     while data.status_code != 200:
-        logging.warning("WB endpoint is faulty. Retrying...")
+        attempt += 1
+        if attempt > 10:
+            return {}
+        logger.info("WB endpoint is faulty. Retrying...")
         time.sleep(RETRY_DELAY)
         data = client.get_ordered(url="orders", week=week, flag=flag, days=days)
     return data.json()
@@ -109,8 +129,12 @@ def get_ordered_products(user, week=False, flag=1, days=None):
 def get_bought_products(user, week=False, flag=1):
     client = RestClient(user)
     data = client.get_ordered(url="sales", week=week, flag=flag)
+    attempt = 0
     while data.status_code != 200:
-        logging.warning("WB endpoint is faulty. Retrying...")
+        attempt += 1
+        if attempt > 10:
+            return {}
+        logger.info("WB endpoint is faulty. Retrying...")
         time.sleep(RETRY_DELAY)
         data = client.get_ordered(url="sales", week=week, flag=flag)
     return data.json()
@@ -118,10 +142,18 @@ def get_bought_products(user, week=False, flag=1):
 
 @cachetools.func.ttl_cache(maxsize=128, ttl=60 * 14)
 def get_stock_products(user):
+    """Getting products in stock."""
+    logger.info("Getting products in stock.")
     client = RestClient(user)
     data = client.get_stock()
+    logger.info(data)
+    attempt = 0
     while data.status_code != 200:
-        logging.warning("WB endpoint is faulty. Retrying...")
+        attempt += 1
+        if attempt > 10:
+            return {}
+        logger.info("WB endpoint is faulty. Retrying...")
         time.sleep(RETRY_DELAY)
         data = client.get_stock()
+    logger.info(data.text[:100])
     return data.json()

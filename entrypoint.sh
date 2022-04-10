@@ -12,6 +12,6 @@ if [ "$DJANGO_SUPERUSER_USERNAME" ]; then
 fi
 
 python manage.py collectstatic --noinput
-gunicorn _settings.wsgi:application --bind 0.0.0.0:8000
+gunicorn _settings.wsgi:application --bind 0.0.0.0:8000 --timeout 240
 
 exec "$@"

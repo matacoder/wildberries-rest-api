@@ -1,10 +1,14 @@
+import concurrent.futures
 import json
 import logging
+from multiprocessing.pool import ThreadPool
+from threading import Thread
 
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.http import HttpResponse
 from django.shortcuts import render
+from loguru import logger
 
 from wb.forms import ApiForm
 from wb.models import ApiKey
@@ -17,17 +21,39 @@ def index(request):
     return render(request, "index.html", {})
 
 
+# https://images.wbstatic.net/portal/education/Kak_rabotat'_s_servisom_statistiki.pdf
+
+
 @login_required
 @api_key_required
 def stock(request):
+    """Display products in stock."""
+    logger.info("View: requested stock")
+
+    # Statistics have 3 requests that take 30+ seconds, so we start another thread pool here
+    # Tread doesn't support return value!
+    pool = ThreadPool(processes=1)
+    async_result = pool.apply_async(get_info_widget, (request.user,))
+    # and actually 3 more threads inside. Magic!
+
+    # So here actually we have 4 concurrent requests
     data = get_stock_products(user=request.user)
-    in_stock = filter(lambda x: x["quantity"] > 0, data)
+
+    # Lets transform data a bit
+    logger.info(f"Getting only positive stocks... {len(data)=}")
+    in_stock = list(filter(lambda x: x["quantity"] > 0, data))
+    logger.info(f"Sorting by quantity... {len(list(in_stock))=}")
     sorted_in_stock = sorted(in_stock, key=lambda x: x["quantity"], reverse=True)
+    logger.info(f"Total in stock: {len(sorted_in_stock)=}")
+
+    # Ready to paginate
     paginator = Paginator(sorted_in_stock, 32)
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
 
-    data = get_info_widget(request.user)
+    # Get our statistics
+    data = async_result.get()
+    logger.info(f"{data=}")
     data["data"] = page_obj
     return render(
         request,
@@ -37,11 +63,25 @@ def stock(request):
 
 
 def get_info_widget(user):
-    return {
-        "payment": get_weekly_payment(user=user),
-        "ordered": get_ordered_sum(user=user),
-        "bought": get_bought_sum(user=user),
-    }
+    """Concurrent request for common data."""
+    logger.info("Concurrent request for statistics...")
+    target_functions = [
+        get_weekly_payment,
+        get_ordered_sum,
+        get_bought_sum,
+    ]
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        futures = []
+        for target_function in target_functions:
+            futures.append(executor.submit(target_function, user=user))
+        result = {
+            "payment": futures[0].result(),
+            "ordered": futures[1].result(),
+            "bought": futures[2].result(),
+        }
+        logger.info(f"{result=}")
+
+    return result
 
 
 @login_required
@@ -51,13 +91,21 @@ def ordered(request):
 
 
 def render_page(function, request):
+    # Statistics have 3 requests that take 30+ seconds, so we start another thread pool here
+    # Tread doesn't support return value!
+    pool = ThreadPool(processes=1)
+    async_result = pool.apply_async(get_info_widget, (request.user,))
+    # and actually 3 more threads inside. Magic!
+
     data = function(user=request.user)
     sorted_by_date = sorted(data, key=lambda x: x["date"], reverse=True)
     paginator = Paginator(sorted_by_date, 32)
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
 
-    data = get_info_widget(request.user)
+    # Get our statistics
+    data = async_result.get()
+
     data["data"] = page_obj
 
     return render(
@@ -75,6 +123,7 @@ def bought(request):
 
 @login_required
 def api(request):
+    logger.info("Api page requested...")
     form = ApiForm(request.POST or None)
     if ApiKey.objects.filter(user=request.user.id).exists():
         api = ApiKey.objects.get(user=request.user.id)
@@ -89,10 +138,25 @@ def api(request):
 @login_required
 @api_key_required
 def weekly_orders_summary(request):
-    data = get_ordered_products(user=request.user, week=False, flag=0, days=14)
+    # Statistics have 3 requests that take 30+ seconds, so we start another thread pool here
+    # Tread doesn't support return value!
+    pool = ThreadPool(processes=1)
+    async_result = pool.apply_async(get_info_widget, (request.user,))
+    # and actually 3 more threads inside. Magic!
+
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        logger.info("Concurrent analytics dicts")
+        future1 = executor.submit(
+            get_ordered_products, user=request.user, week=False, flag=0, days=14
+        )
+        future2 = executor.submit(get_stock_as_dict, request)
+        data = future1.result()
+        stock = future2.result()
+    logger.info("We've got STOCK and DATA")
+    # data = get_ordered_products(user=request.user, week=False, flag=0, days=14)
     combined = dict()
     to_order = request.GET.get("to_order", False)
-    stock = get_stock_as_dict(request)
+    # stock = get_stock_as_dict(request)
     for item in data:
 
         wb_id = item["nmId"]
@@ -124,7 +188,9 @@ def weekly_orders_summary(request):
     paginator = Paginator(sorted_data, 32)
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
-    data = get_info_widget(request.user)
+
+    # Get our statistics
+    data = async_result.get()
     data["data"] = page_obj
 
     return render(
@@ -135,10 +201,12 @@ def weekly_orders_summary(request):
 
 
 def get_stock_as_dict(request):
+    """Must be rewritten with saving to DB"""
+    logger.info("Getting stock as dict")
     stock = get_stock_products(user=request.user)
     stock_as_dict = dict()
     for item in stock:
-        key = item["nmId"]
+        key = item["nmId"]  # wb_id
         price = int(item["Price"] * ((100 - item["Discount"]) / 100))
         data = {
             "wb_id": item["nmId"],
