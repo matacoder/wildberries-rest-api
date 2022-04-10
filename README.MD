@@ -25,8 +25,9 @@ Live version is here: [wb.matakov.com](https://wb.matakov.com)
 1) Install Docker for your OS
 2) Run `cmd` or `Windows Powershell`
 3) Navigate to folder with cloned repository
-4) Run `docker compose up`
-5) Site will run at `127.0.0.1:1112`
+4) Create `.env`, as template you may use [this example](https://github.com/matacoder/django-docker/blob/master/.env)
+5) Run `docker compose up`
+6) Site will run at `127.0.0.1:1112`
 
 
 # Как запустить на моем компьютере?
@@ -34,5 +35,6 @@ Live version is here: [wb.matakov.com](https://wb.matakov.com)
 1) Установите Docker для вашей операционной системы
 2) Запустите `cmd` или `Windows Powershell`
 3) Склонируйте репозиторий и перейдите в его папку
-4) Запустите `docker compose up`
-5) Сайт будет доступен по адресу: `127.0.0.1:1112`
+4) Создайте файл `.env`, за основу можно взять [образец отсюда](https://github.com/matacoder/django-docker/blob/master/.env)
+5) Запустите `docker compose up`
+6) Сайт будет доступен по адресу: `127.0.0.1:1112`
