@@ -1,15 +1,22 @@
 import datetime
 import functools
+import json
 import time
+from threading import Thread
+from typing import Callable
 
-import cachetools.func
+
 import requests
+
 from django.shortcuts import redirect
 from loguru import logger
 
+from _settings.settings import redis_client
 from wb.models import ApiKey
 
 RETRY_DELAY = 0.1
+
+running_threads = set()
 
 
 def api_key_required(func):
@@ -39,6 +46,7 @@ class RestClient:
 
     @staticmethod
     def connect(params, server):
+        # redis_client.get_date
         response = requests.get(url=server, params=params)
         logger.info(f"URL WAS: {response.url}")
         return response
@@ -68,15 +76,42 @@ class RestClient:
         return self.connect(params, self.base_url + url)
 
 
-@cachetools.func.ttl_cache(maxsize=128, ttl=60 * 8)
-def get_last_week(user):
-    client = RestClient(user)
-    data = client.get_report("reportDetailByPeriod", week=True).json()
-    payment = sum((x["supplier_reward"]) for x in data)
-    return int(payment)
+def redis_cache_decorator(func: Callable):
+    @functools.wraps(func)
+    def wrapper(user, *args, **kwargs):
+        logger.info(f"Redis decorator for {func.__name__}")
+        api_key = ApiKey.objects.get(user=user).api
+        args_key = "args" + json.dumps(args) + json.dumps(kwargs)
+        redis_full_key = f"{api_key}:{func.__name__}:{args_key}"
+
+        cached_result = redis_client.get(redis_full_key)
+
+        def run_and_cache():
+            global running_threads
+            running_threads.add(redis_full_key)
+            result = func(user, *args, **kwargs)
+            redis_client.set(redis_full_key, json.dumps(result))
+            logger.info(f"Redis decorator for {func.__name__}: finished calc in thread!")
+            running_threads.remove(redis_full_key)
+            return result
+
+        if not cached_result:
+            logger.info(f"Redis decorator for {func.__name__}: not found, calculating")
+            cached_result = run_and_cache()
+        else:
+            cached_result = json.loads(cached_result)
+            if redis_full_key not in running_threads:
+                logger.info(f"Redis decorator for {func.__name__}: found! Running update in thread...")
+                thread = Thread(target=run_and_cache)
+                thread.start()
+            else:
+                logger.info(f"Redis decorator for {func.__name__}: is already running")
+        return cached_result
+
+    return wrapper
 
 
-@cachetools.func.ttl_cache(maxsize=128, ttl=60 * 9)
+@redis_cache_decorator
 def get_weekly_payment(user):
     logger.info("Getting weekly payment...")
     data = get_bought_products(user, week=True, flag=0)
@@ -87,7 +122,7 @@ def get_weekly_payment(user):
         return "WB error"
 
 
-@cachetools.func.ttl_cache(maxsize=128, ttl=60 * 10)
+@redis_cache_decorator
 def get_ordered_sum(user):
     logger.info("Getting ordered payment...")
     data = get_ordered_products(user)
@@ -99,7 +134,7 @@ def get_ordered_sum(user):
         return "WB error"
 
 
-@cachetools.func.ttl_cache(maxsize=128, ttl=60 * 11)
+@redis_cache_decorator
 def get_bought_sum(user):
     logger.info("Getting bought payment...")
     data = get_bought_products(user, week=False)
@@ -109,9 +144,8 @@ def get_bought_sum(user):
         return "WB error"
 
 
-@cachetools.func.ttl_cache(maxsize=128, ttl=60 * 12)
+@redis_cache_decorator
 def get_ordered_products(user, week=False, flag=1, days=None):
-
     client = RestClient(user)
     data = client.get_ordered(url="orders", week=week, flag=flag, days=days)
     attempt = 0
@@ -125,7 +159,7 @@ def get_ordered_products(user, week=False, flag=1, days=None):
     return data.json()
 
 
-@cachetools.func.ttl_cache(maxsize=128, ttl=60 * 13)
+@redis_cache_decorator
 def get_bought_products(user, week=False, flag=1):
     client = RestClient(user)
     data = client.get_ordered(url="sales", week=week, flag=flag)
@@ -140,7 +174,7 @@ def get_bought_products(user, week=False, flag=1):
     return data.json()
 
 
-@cachetools.func.ttl_cache(maxsize=128, ttl=60 * 14)
+@redis_cache_decorator
 def get_stock_products(user):
     """Getting products in stock."""
     logger.info("Getting products in stock.")

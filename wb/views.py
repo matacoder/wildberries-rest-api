@@ -2,7 +2,7 @@ import concurrent.futures
 import json
 import logging
 from multiprocessing.pool import ThreadPool
-from threading import Thread
+
 
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
@@ -10,6 +10,7 @@ from django.http import HttpResponse
 from django.shortcuts import render
 from loguru import logger
 
+from _settings.settings import redis_client
 from wb.forms import ApiForm
 from wb.models import ApiKey
 from wb.services import (api_key_required, get_bought_products, get_bought_sum,
@@ -17,7 +18,13 @@ from wb.services import (api_key_required, get_bought_products, get_bought_sum,
                          get_stock_products, get_weekly_payment)
 
 
+
 def index(request):
+    big_data = {
+        "key": "value"
+    }
+    redis_client.set('foo', json.dumps(big_data))
+    logger.info(redis_client.get("foo2"))
     return render(request, "index.html", {})
 
 

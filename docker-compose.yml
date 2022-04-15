@@ -1,8 +1,9 @@
 version: '3.9'
-# run docker-compose up to start development at http://127.0.0.1:1111
 
 volumes:
   postgres_data:
+  cache:
+    driver: local
 
 services:
   db:
@@ -36,3 +37,14 @@ services:
     depends_on:
       - django
     restart: always
+
+  cache:
+    image: redis:6.2-alpine
+    restart: always
+    ports:
+      - '6379:6379'
+    command: redis-server --save 600 1 --loglevel warning --requirepass ${REDIS_PASSWORD}
+    volumes:
+      - cache:/data
+    env_file:
+      - ./.env

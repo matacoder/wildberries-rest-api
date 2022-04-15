@@ -16,6 +16,7 @@ cachetools = "^4.2.2"
 django-debug-toolbar = "^3.2.1"
 django-bulma = "^0.8.3"
 loguru = "^0.6.0"
+redis = "^4.2.2"
 
 [tool.poetry.dev-dependencies]
 
