@@ -1,6 +1,7 @@
 import datetime
 import functools
 import json
+import pickle
 import time
 from threading import Thread
 from typing import Callable
@@ -83,14 +84,20 @@ def redis_cache_decorator(func: Callable):
         api_key = ApiKey.objects.get(user=user).api
         args_key = "args" + json.dumps(args) + json.dumps(kwargs)
         redis_full_key = f"{api_key}:{func.__name__}:{args_key}"
+        redis_timestamp_key = f"{redis_full_key}:updated_at"
 
         cached_result = redis_client.get(redis_full_key)
+        timestamp = redis_client.get(redis_timestamp_key)
+        current_time = datetime.datetime.now()
+
+        threshold = datetime.timedelta(minutes=10)
 
         def run_and_cache():
             global running_threads
             running_threads.add(redis_full_key)
             result = func(user, *args, **kwargs)
             redis_client.set(redis_full_key, json.dumps(result))
+            redis_client.set(redis_timestamp_key, pickle.dumps(current_time))
             logger.info(f"Redis decorator for {func.__name__}: finished calc in thread!")
             running_threads.remove(redis_full_key)
             return result
@@ -101,9 +108,17 @@ def redis_cache_decorator(func: Callable):
         else:
             cached_result = json.loads(cached_result)
             if redis_full_key not in running_threads:
-                logger.info(f"Redis decorator for {func.__name__}: found! Running update in thread...")
-                thread = Thread(target=run_and_cache)
-                thread.start()
+                if not timestamp:
+                    timestamp = current_time - datetime.timedelta(minutes=11)
+                    redis_client.set(redis_timestamp_key, pickle.dumps(current_time))
+                else:
+                    timestamp = pickle.loads(timestamp)
+                if current_time - timestamp > threshold:
+                    logger.info(f"Redis decorator for {func.__name__}: found! Running update in thread...")
+                    thread = Thread(target=run_and_cache)
+                    thread.start()
+                else:
+                    logger.info(f"Less than 10 minutes passed since previous check for {func.__name__}")
             else:
                 logger.info(f"Redis decorator for {func.__name__}: is already running")
         return cached_result
