@@ -28,5 +28,9 @@ class Command(BaseCommand):
                     futures = []
                     for func in funcs:
                         futures.append(executor.submit(func, user))
-                sleep(30)
-            sleep(60*10)
+
+                # for func in funcs:
+                #     func(user)
+
+                sleep(600)
+            sleep(60*10*20)
