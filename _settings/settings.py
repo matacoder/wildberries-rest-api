@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 import os
 from pathlib import Path
+
 import redis
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 from django.urls import reverse
@@ -25,8 +26,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get("SECRET_KEY")
 
 REDIS_PASSWORD = os.environ.get("REDIS_PASSWORD")
+STATISTIC_REFRESH_THRESHOLD = 10
 
-redis_client: redis.Redis = redis.Redis(host="cache", port=6379, password=REDIS_PASSWORD)
+
+redis_client: redis.Redis = redis.Redis(
+    host="cache", port=6379, password=REDIS_PASSWORD
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get("DEBUG") == "1"

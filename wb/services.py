@@ -6,13 +6,11 @@ import time
 from threading import Thread
 from typing import Callable
 
-
 import requests
-
 from django.shortcuts import redirect
 from loguru import logger
 
-from _settings.settings import redis_client
+from _settings.settings import STATISTIC_REFRESH_THRESHOLD, redis_client
 from wb.models import ApiKey
 
 RETRY_DELAY = 0.1
@@ -32,8 +30,8 @@ def api_key_required(func):
 
 
 class RestClient:
-    def __init__(self, user):
-        self.token = ApiKey.objects.get(user=user.id).api
+    def __init__(self, token):
+        self.token = token
         self.base_url = "https://suppliers-stats.wildberries.ru/api/v1/supplier/"
 
     @staticmethod
@@ -79,9 +77,9 @@ class RestClient:
 
 def redis_cache_decorator(func: Callable):
     @functools.wraps(func)
-    def wrapper(user, *args, **kwargs):
-        logger.info(f"Redis decorator for {func.__name__}")
-        api_key = ApiKey.objects.get(user=user).api
+    def wrapper(token, *args, **kwargs):
+        logger.info(f"Redis decorator for {func.__name__} with {token=}")
+        api_key = token
         args_key = "args" + json.dumps(args) + json.dumps(kwargs)
         redis_full_key = f"{api_key}:{func.__name__}:{args_key}"
         redis_timestamp_key = f"{redis_full_key}:updated_at"
@@ -90,15 +88,17 @@ def redis_cache_decorator(func: Callable):
         timestamp = redis_client.get(redis_timestamp_key)
         current_time = datetime.datetime.now()
 
-        threshold = datetime.timedelta(minutes=10)
+        threshold = datetime.timedelta(minutes=STATISTIC_REFRESH_THRESHOLD)
 
         def run_and_cache():
             global running_threads
             running_threads.add(redis_full_key)
-            result = func(user, *args, **kwargs)
+            result = func(token, *args, **kwargs)
             redis_client.set(redis_full_key, json.dumps(result))
             redis_client.set(redis_timestamp_key, pickle.dumps(current_time))
-            logger.info(f"Redis decorator for {func.__name__}: finished calc in thread!")
+            logger.info(
+                f"Redis decorator for {func.__name__}: finished calc in thread!"
+            )
             running_threads.remove(redis_full_key)
             return result
 
@@ -114,11 +114,15 @@ def redis_cache_decorator(func: Callable):
                 else:
                     timestamp = pickle.loads(timestamp)
                 if current_time - timestamp > threshold:
-                    logger.info(f"Redis decorator for {func.__name__}: found! Running update in thread...")
+                    logger.info(
+                        f"Redis decorator for {func.__name__}: found! Running update in thread..."
+                    )
                     thread = Thread(target=run_and_cache)
                     thread.start()
                 else:
-                    logger.info(f"Less than 10 minutes passed since previous check for {func.__name__}")
+                    logger.info(
+                        f"Less than {STATISTIC_REFRESH_THRESHOLD} minutes passed since previous check for {func.__name__}"
+                    )
             else:
                 logger.info(f"Redis decorator for {func.__name__}: is already running")
         return cached_result
@@ -127,41 +131,41 @@ def redis_cache_decorator(func: Callable):
 
 
 @redis_cache_decorator
-def get_weekly_payment(user):
+def get_weekly_payment(token):
     logger.info("Getting weekly payment...")
-    data = get_bought_products(user, week=True, flag=0)
+    data = get_bought_products(token, week=True, flag=0)
     if data:
         payment = sum((x["forPay"]) for x in data)
         return int(payment)
     else:
-        return "WB error"
+        return 0
 
 
 @redis_cache_decorator
-def get_ordered_sum(user):
+def get_ordered_sum(token):
     logger.info("Getting ordered payment...")
-    data = get_ordered_products(user)
+    data = get_ordered_products(token)
     if data:
         return int(
             sum((x["totalPrice"] * (1 - x["discountPercent"] / 100)) for x in data)
         )
     else:
-        return "WB error"
+        return 0
 
 
 @redis_cache_decorator
-def get_bought_sum(user):
+def get_bought_sum(token):
     logger.info("Getting bought payment...")
-    data = get_bought_products(user, week=False)
+    data = get_bought_products(token)
     if data:
         return int(sum((x["forPay"]) for x in data))
     else:
-        return "WB error"
+        return 0
 
 
 @redis_cache_decorator
-def get_ordered_products(user, week=False, flag=1, days=None):
-    client = RestClient(user)
+def get_ordered_products(token, week=False, flag=1, days=None):
+    client = RestClient(token)
     data = client.get_ordered(url="orders", week=week, flag=flag, days=days)
     attempt = 0
     while data.status_code != 200:
@@ -175,8 +179,8 @@ def get_ordered_products(user, week=False, flag=1, days=None):
 
 
 @redis_cache_decorator
-def get_bought_products(user, week=False, flag=1):
-    client = RestClient(user)
+def get_bought_products(token, week=False, flag=1):
+    client = RestClient(token)
     data = client.get_ordered(url="sales", week=week, flag=flag)
     attempt = 0
     while data.status_code != 200:
@@ -190,10 +194,10 @@ def get_bought_products(user, week=False, flag=1):
 
 
 @redis_cache_decorator
-def get_stock_products(user):
+def get_stock_products(token):
     """Getting products in stock."""
     logger.info("Getting products in stock.")
-    client = RestClient(user)
+    client = RestClient(token)
     data = client.get_stock()
     logger.info(data)
     attempt = 0

@@ -3,7 +3,6 @@ import json
 import logging
 from multiprocessing.pool import ThreadPool
 
-
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.http import HttpResponse
@@ -18,12 +17,9 @@ from wb.services import (api_key_required, get_bought_products, get_bought_sum,
                          get_stock_products, get_weekly_payment)
 
 
-
 def index(request):
-    big_data = {
-        "key": "value"
-    }
-    redis_client.set('foo', json.dumps(big_data))
+    big_data = {"key": "value"}
+    redis_client.set("foo", json.dumps(big_data))
     logger.info(redis_client.get("foo2"))
     return render(request, "index.html", {})
 
@@ -36,15 +32,16 @@ def index(request):
 def stock(request):
     """Display products in stock."""
     logger.info("View: requested stock")
+    token = ApiKey.objects.get(user=request.user.id).api
 
     # Statistics have 3 requests that take 30+ seconds, so we start another thread pool here
     # Tread doesn't support return value!
     pool = ThreadPool(processes=1)
-    async_result = pool.apply_async(get_info_widget, (request.user,))
+    async_result = pool.apply_async(get_info_widget, (token,))
     # and actually 3 more threads inside. Magic!
 
     # So here actually we have 4 concurrent requests
-    data = get_stock_products(user=request.user)
+    data = get_stock_products(token)
 
     # Lets transform data a bit
     logger.info(f"Getting only positive stocks... {len(data)=}")
@@ -69,7 +66,7 @@ def stock(request):
     )
 
 
-def get_info_widget(user):
+def get_info_widget(token):
     """Concurrent request for common data."""
     logger.info("Concurrent request for statistics...")
     target_functions = [
@@ -80,7 +77,7 @@ def get_info_widget(user):
     with concurrent.futures.ThreadPoolExecutor() as executor:
         futures = []
         for target_function in target_functions:
-            futures.append(executor.submit(target_function, user=user))
+            futures.append(executor.submit(target_function, token))
         result = {
             "payment": futures[0].result(),
             "ordered": futures[1].result(),
@@ -100,11 +97,12 @@ def ordered(request):
 def render_page(function, request):
     # Statistics have 3 requests that take 30+ seconds, so we start another thread pool here
     # Tread doesn't support return value!
+    token = ApiKey.objects.get(user=request.user.id).api
     pool = ThreadPool(processes=1)
-    async_result = pool.apply_async(get_info_widget, (request.user,))
+    async_result = pool.apply_async(get_info_widget, (token,))
     # and actually 3 more threads inside. Magic!
 
-    data = function(user=request.user)
+    data = function(token)
     sorted_by_date = sorted(data, key=lambda x: x["date"], reverse=True)
     paginator = Paginator(sorted_by_date, 32)
     page_number = request.GET.get("page")
@@ -147,23 +145,24 @@ def api(request):
 def weekly_orders_summary(request):
     # Statistics have 3 requests that take 30+ seconds, so we start another thread pool here
     # Tread doesn't support return value!
+    token = ApiKey.objects.get(user=request.user.id).api
     pool = ThreadPool(processes=1)
-    async_result = pool.apply_async(get_info_widget, (request.user,))
+    async_result = pool.apply_async(get_info_widget, (token,))
     # and actually 3 more threads inside. Magic!
 
     with concurrent.futures.ThreadPoolExecutor() as executor:
         logger.info("Concurrent analytics dicts")
         future1 = executor.submit(
-            get_ordered_products, user=request.user, week=False, flag=0, days=14
+            get_ordered_products, token=token, week=False, flag=0, days=14
         )
         future2 = executor.submit(get_stock_as_dict, request)
         data = future1.result()
         stock = future2.result()
     logger.info("We've got STOCK and DATA")
-    # data = get_ordered_products(user=request.user, week=False, flag=0, days=14)
+
     combined = dict()
     to_order = request.GET.get("to_order", False)
-    # stock = get_stock_as_dict(request)
+
     for item in data:
 
         wb_id = item["nmId"]
@@ -210,7 +209,8 @@ def weekly_orders_summary(request):
 def get_stock_as_dict(request):
     """Must be rewritten with saving to DB"""
     logger.info("Getting stock as dict")
-    stock = get_stock_products(user=request.user)
+    token = ApiKey.objects.get(user=request.user.id).api
+    stock = get_stock_products(token)
     stock_as_dict = dict()
     for item in stock:
         key = item["nmId"]  # wb_id
