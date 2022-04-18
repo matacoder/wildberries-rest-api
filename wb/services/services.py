@@ -53,7 +53,7 @@ class RestClient:
     def get_stock(self):
         logger.info("Preparing url params for stocks...")
         params = {
-            "dateFrom": self.get_date(),
+            "dateFrom": self.get_date(days=15),
             "key": self.token,
         }
         return self.connect(params, self.base_url + "stocks")
@@ -78,7 +78,7 @@ class RestClient:
 def redis_cache_decorator(func: Callable):
     @functools.wraps(func)
     def wrapper(token, *args, **kwargs):
-        logger.info(f"Redis decorator for {func.__name__} with {token=}")
+        # logger.info(f"Redis decorator for {func.__name__} with {token=}")
         api_key = token
         args_key = "args" + json.dumps(args) + json.dumps(kwargs)
         redis_full_key = f"{api_key}:{func.__name__}:{args_key}"
@@ -96,14 +96,14 @@ def redis_cache_decorator(func: Callable):
             result = func(token, *args, **kwargs)
             redis_client.set(redis_full_key, json.dumps(result))
             redis_client.set(redis_timestamp_key, pickle.dumps(current_time))
-            logger.info(
-                f"Redis decorator for {func.__name__}: finished calc in thread!"
-            )
+            # logger.info(
+            #     f"Redis decorator for {func.__name__}: finished calc in thread!"
+            # )
             running_threads.remove(redis_full_key)
             return result
 
         if not cached_result:
-            logger.info(f"Redis decorator for {func.__name__}: not found, calculating")
+            # logger.info(f"Redis decorator for {func.__name__}: not found, calculating")
             cached_result = run_and_cache()
         else:
             cached_result = json.loads(cached_result)
@@ -114,17 +114,17 @@ def redis_cache_decorator(func: Callable):
                 else:
                     timestamp = pickle.loads(timestamp)
                 if current_time - timestamp > threshold:
-                    logger.info(
-                        f"Redis decorator for {func.__name__}: found! Running update in thread..."
-                    )
+                    # logger.info(
+                    # f"Redis decorator for {func.__name__}: found! Running update in thread..."
+                    # )
                     thread = Thread(target=run_and_cache)
                     thread.start()
-                else:
-                    logger.info(
-                        f"Less than {STATISTIC_REFRESH_THRESHOLD} minutes passed since previous check for {func.__name__}"
-                    )
-            else:
-                logger.info(f"Redis decorator for {func.__name__}: is already running")
+                # else:
+                #     logger.info(
+                #         f"Less than {STATISTIC_REFRESH_THRESHOLD} minutes passed since previous check for {func.__name__}"
+                #     )
+            # else:
+            # logger.info(f"Redis decorator for {func.__name__}: is already running")
         return cached_result
 
     return wrapper
@@ -137,8 +137,7 @@ def get_weekly_payment(token):
     if data:
         payment = sum((x["forPay"]) for x in data)
         return int(payment)
-    else:
-        return 0
+    return 0
 
 
 @redis_cache_decorator
@@ -149,8 +148,7 @@ def get_ordered_sum(token):
         return int(
             sum((x["totalPrice"] * (1 - x["discountPercent"] / 100)) for x in data)
         )
-    else:
-        return 0
+    return 0
 
 
 @redis_cache_decorator
@@ -159,8 +157,7 @@ def get_bought_sum(token):
     data = get_bought_products(token)
     if data:
         return int(sum((x["forPay"]) for x in data))
-    else:
-        return 0
+    return 0
 
 
 @redis_cache_decorator

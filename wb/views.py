@@ -12,15 +12,22 @@ from loguru import logger
 from _settings.settings import redis_client
 from wb.forms import ApiForm
 from wb.models import ApiKey
-from wb.services import (api_key_required, get_bought_products, get_bought_sum,
-                         get_ordered_products, get_ordered_sum,
-                         get_stock_products, get_weekly_payment)
+from wb.services.services import (
+    api_key_required,
+    get_bought_products,
+    get_bought_sum,
+    get_ordered_products,
+    get_ordered_sum,
+    get_stock_products,
+    get_weekly_payment,
+)
+from wb.services.warehouse import get_stock_objects, add_weekly_sales
 
 
 def index(request):
     big_data = {"key": "value"}
     redis_client.set("foo", json.dumps(big_data))
-    logger.info(redis_client.get("foo2"))
+    logger.info(redis_client.get("foo"))
     return render(request, "index.html", {})
 
 
@@ -41,24 +48,38 @@ def stock(request):
     # and actually 3 more threads inside. Magic!
 
     # So here actually we have 4 concurrent requests
-    data = get_stock_products(token)
-
-    # Lets transform data a bit
-    logger.info(f"Getting only positive stocks... {len(data)=}")
-    in_stock = list(filter(lambda x: x["quantity"] > 0, data))
-    logger.info(f"Sorting by quantity... {len(list(in_stock))=}")
-    sorted_in_stock = sorted(in_stock, key=lambda x: x["quantity"], reverse=True)
-    logger.info(f"Total in stock: {len(sorted_in_stock)=}")
+    products = get_stock_objects(token)
+    products = add_weekly_sales(token, products)
+    products = list(products.values())
+    products = sorted(products, key=lambda product: product.stock, reverse=True)
 
     # Ready to paginate
-    paginator = Paginator(sorted_in_stock, 32)
+    paginator = Paginator(products, 32)
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
 
     # Get our statistics
     data = async_result.get()
     logger.info(f"{data=}")
+
+    # General statistics
+    total_sku = 0
+    total_qty = 0
+    total_value = 0
+    can_be_ordered_qty = 0
+    for product in products:
+        total_sku += 1
+        total_qty += product.stock
+        if (product.stock - product.in_way_to_client - product.in_way_from_client) > 0:
+            can_be_ordered_qty += 1
+        total_value += product.stock * product.price
+
     data["data"] = page_obj
+    data["total_sku"] = total_sku
+    data["total"] = total_qty
+    data["can_be_ordered_qty"] = can_be_ordered_qty
+    data["total_value"] = total_value
+
     return render(
         request,
         "stock.html",

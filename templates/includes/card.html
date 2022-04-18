@@ -7,25 +7,30 @@
             <div class="card">
                 <div class="card-image">
                     <figure class="image is-3by4">
-                        <img src="{% get_image_url item.nmId %}"/>
+                        <img src="{% get_image_url item.nm_id %}"/>
                     </figure>
                 </div>
                 <div class="card-content">
                     <a target="_blank"
-                       href="https://www.wildberries.ru/catalog/{{ item.nmId }}/detail.aspx?targetUrl=ES">
-                        <p class="title is-5">{{ item.supplierArticle }}<br/>
-                            Size: {{ item.techSize }}</p>
-                    </a>
+                       href="https://www.wildberries.ru/catalog/{{ item.nm_id }}/detail.aspx?targetUrl=ES">
+                        <p class="title is-5">{{ item.supplier_article }}</p></a>
+                    <p class="block"> {% for size in item.sizes.values %}<span class="button is-light">
+                        <span class="tag is-success">{{ size.tech_size }}</span>&nbsp;Купили: {{ size.total_sales }} Склад: {{ size.quantity_full }}
+                    </span>
+                    {% endfor %}
+                    </p>
                     <div class="content">
-                        Barcode: {{ item.barcode }}<br/>
-                        Warehouse: {{ item.warehouseName }}<br/>
-                        To clients: {{ item.inWayToClient }},
-                        from {{ item.inWayFromClient }}<br/>
-                        On site {{ item.daysOnSite }} days<br/>
-                        <progress class="progress is-primary" value="{{ item.daysOnSite }}"
+                        Номер ВБ: <a target="_blank"
+                                     href="https://www.wildberries.ru/catalog/{{ item.nm_id }}/detail.aspx?targetUrl=ES">{{ item.nm_id }}</a><br/>
+                        ШК: {{ item.barcode }}<br/>
+                        Едет к клиентам: {{ item.in_way_to_client }},<br/>
+                        Едет от клиентов: {{ item.in_way_from_client }}<br/>
+                        На сайте {{ item.days_on_site }} дней<br/>
+                        <progress class="progress is-primary" value="{{ item.days_on_site }}"
                                   max="999"></progress>
-                        {{ item.quantity }} pieces for {{ item.Price }} rub. each<br/>
-                        Discount: {{ item.Discount }}%<br/>
+                        Остаток: {{ item.stock }} шт.<br/>
+                        Цена: <span class="tag is-light">{{ item.price }}</span> руб<br/>
+                        Скидка: {{ item.discount }}%<br/>
                     </div>
                 </div>
             </div>
