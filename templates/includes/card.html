@@ -34,7 +34,7 @@
                         Скидка: {{ item.discount }}%<br/>
                         <span class="box">
                             <form hx-get="/update_discount/"
-                                  hx-target="#discount_update_result">
+                                  hx-target="#discount_update_result_{{ item.nm_id }}">
                                 <input type="hidden" id="wb_id" name="wb_id" value="{{ item.nm_id }}">
                                 <input type="hidden" id="full_price" name="full_price" value="{{ item.full_price }}">
                                 <div class="field is-grouped">
@@ -46,7 +46,7 @@
                                 </p>
                                     </div>
                                 <p class="control">
-                                    <button class="button is-info is-small" type="submit" id="discount_update_result"
+                                    <button class="button is-info is-small" type="submit" id="discount_update_result_{{ item.nm_id }}"
                                             value="">Установить через %</button>
                                 </p>
                             </form>
