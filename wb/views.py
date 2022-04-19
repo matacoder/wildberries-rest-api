@@ -1,6 +1,7 @@
 import concurrent.futures
 import json
 import logging
+import pickle
 from multiprocessing.pool import ThreadPool
 
 from django.contrib.auth.decorators import login_required
@@ -9,6 +10,7 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
 from loguru import logger
 
+from _settings.settings import redis_client
 from wb.forms import ApiForm
 from wb.models import ApiKey
 from wb.services.new_api_client import NewApiClient
@@ -33,23 +35,31 @@ def index(request):
 @login_required
 @api_key_required
 def update_discount(request):
-    key = ApiKey.objects.get(user=request.user).new_api
+    tokens = ApiKey.objects.get(user=request.user)
+    new_token = tokens.new_api
+    x64_token = tokens.api
 
-    if not key:
+    if not new_token:
         return HttpResponse("Нужно указать API-ключ!")
 
-    new_client = NewApiClient(key)
+    new_client = NewApiClient(new_token)
     wb_id = request.GET.get("wb_id")
 
     new_price = int(request.GET.get("new_price"))
     if new_price:
         full_price = int(request.GET.get("full_price"))
-        new_discount = int(100 - new_price / full_price * 100)
+        new_discount = int(100 - new_price * 100 / full_price)
         logger.info(f"Посчитана скидка в {new_discount}%")
     else:
         new_discount = int(request.GET.get("new_discount"))
     if new_discount is not None:
         if new_client.update_discount(wb_id, new_discount):
+            redis_key = f"{x64_token}:update_discount:{wb_id}"
+            redis_value = pickle.dumps({
+                "new_price": new_price,
+                "new_discount": new_discount,
+            })
+            redis_client.set(redis_key, redis_value, ex=60*60*4)
             return HttpResponse(f"Установлена {new_discount}% скидка")
     return HttpResponse("Не удалось обновить :(")
 
@@ -127,7 +137,6 @@ def get_info_widget(token):
             "ordered": futures[1].result(),
             "bought": futures[2].result(),
         }
-        logger.info(f"{result=}")
 
     return result
 

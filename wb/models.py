@@ -28,6 +28,7 @@ class Product:
     in_way_from_client: int = 0  # inWayFromClient
     barcode: str = ""
     days_on_site: str = ""
+    has_been_updated: dict = field(default_factory=dict)
 
     @property
     def stock(self):

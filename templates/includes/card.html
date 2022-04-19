@@ -50,6 +50,11 @@
                                             value="">Установить через %</button>
                                 </p>
                             </form>
+                            {% if item.has_been_updated %}
+                                <div class="tag is-danger">
+                                Цена: {{ item.has_been_updated.new_price }}, Скидка: {{ item.has_been_updated.new_discount }}
+                                </div>
+                            {% endif %}
                         </span>
                     </div>
                 </div>

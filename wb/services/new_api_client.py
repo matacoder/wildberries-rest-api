@@ -3,6 +3,8 @@ import json
 import requests
 from loguru import logger
 
+from _settings.settings import redis_client
+
 
 class NewApiClient:
     def __init__(self, new_api_key: str):
