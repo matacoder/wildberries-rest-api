@@ -36,7 +36,7 @@ def update_discount(request):
     key = ApiKey.objects.get(user=request.user).new_api
 
     if not key:
-        redirect("api")
+        return HttpResponse("Нужно указать API-ключ!")
 
     new_client = NewApiClient(key)
     wb_id = request.GET.get("wb_id")
