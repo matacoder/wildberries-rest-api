@@ -5,12 +5,12 @@
 {% block content %}
     <div class="box">
         {% load bulma_tags %}
-        <h2 class="title">Укажите ваш ключ API (x64)</h2>
+        <h2 class="title">Укажите ваш ключ API</h2>
         <div class="block"><a href="https://seller.wb.ru/supplier-settings/access-to-api" target="_blank">Ссылка на
-            раздел ВБ с ключом</a></div>
-        {% if api %}
-        <div class="block">Указан ключ: <strong>{{ api }}</strong></div>
-        {% endif %}
+            раздел ВБ с x64 ключом</a></div>
+        <div class="block"><a href="https://seller.wb.ru/supplier-settings/access-to-new-api" target="_blank">Ссылка на
+            раздел ВБ с новым JWT ключом</a></div>
+
         <form method="post">
             {% csrf_token %}
             {{ form|bulma }}

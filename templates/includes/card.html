@@ -29,8 +29,28 @@
                         <progress class="progress is-primary" value="{{ item.days_on_site }}"
                                   max="999"></progress>
                         Остаток: {{ item.stock }} шт.<br/>
-                        Цена: <span class="tag is-light">{{ item.price }}</span> руб<br/>
+                        Цена старая: {{ item.full_price }} рублей <br/>
+                        Цена на сайте: <span class="tag is-danger">{{ item.price }}</span> руб<br/>
                         Скидка: {{ item.discount }}%<br/>
+                        <span class="box">
+                            <form hx-get="/update_discount/"
+                                  hx-target="#discount_update_result">
+                                <input type="hidden" id="wb_id" name="wb_id" value="{{ item.nm_id }}">
+                                <input type="hidden" id="full_price" name="full_price" value="{{ item.full_price }}">
+                                <div class="field is-grouped">
+                                <p class="is-small">Цена:&nbsp;</p>
+                                <p class="control is-expanded">
+                                    <input class="input is-small" type="text"
+                                           value="{{ item.price }}" id="new_price"
+                                           name="new_price">
+                                </p>
+                                    </div>
+                                <p class="control">
+                                    <button class="button is-info is-small" type="submit" id="discount_update_result"
+                                            value="">Установить через %</button>
+                                </p>
+                            </form>
+                        </span>
                     </div>
                 </div>
             </div>

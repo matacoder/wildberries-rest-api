@@ -21,6 +21,7 @@ def get_stock_objects(token):
 
         # Update product
         product.price = int(item["Price"] * ((100 - item["Discount"]) / 100))
+        product.full_price = int(item["Price"])
         product.discount = item["Discount"]
         product.in_way_to_client = item.get("inWayToClient", 0)
         product.in_way_from_client = item.get("inWayFromClient", 0)

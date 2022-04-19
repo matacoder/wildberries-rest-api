@@ -8,4 +8,5 @@ class ApiForm(ModelForm):
         model = ApiKey
         fields = [
             "api",
+            "new_api",
         ]

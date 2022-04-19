@@ -5,13 +5,13 @@ from multiprocessing.pool import ThreadPool
 
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
-from django.http import HttpResponse
-from django.shortcuts import render
+from django.http import HttpResponse, JsonResponse
+from django.shortcuts import render, redirect
 from loguru import logger
 
-from _settings.settings import redis_client
 from wb.forms import ApiForm
 from wb.models import ApiKey
+from wb.services.new_api_client import NewApiClient
 from wb.services.services import (
     api_key_required,
     get_bought_products,
@@ -25,13 +25,36 @@ from wb.services.warehouse import get_stock_objects, add_weekly_sales
 
 
 def index(request):
-    big_data = {"key": "value"}
-    redis_client.set("foo", json.dumps(big_data))
-    logger.info(redis_client.get("foo"))
+    # https://images.wbstatic.net/portal/education/Kak_rabotat'_s_servisom_statistiki.pdf
+    # https://suppliers-api.wildberries.ru/swagger/index.html
     return render(request, "index.html", {})
 
 
-# https://images.wbstatic.net/portal/education/Kak_rabotat'_s_servisom_statistiki.pdf
+@login_required
+@api_key_required
+def update_discount(request):
+    key = ApiKey.objects.get(user=request.user).new_api
+
+    if not key:
+        redirect("api")
+
+    new_client = NewApiClient(key)
+    wb_id = request.GET.get("wb_id")
+
+    new_price = int(request.GET.get("new_price"))
+    if new_price:
+        full_price = int(request.GET.get("full_price"))
+        new_discount = int(100 - new_price / full_price * 100)
+        logger.info(f"Посчитана скидка в {new_discount}%")
+    else:
+        new_discount = int(request.GET.get("new_discount"))
+    if new_discount is not None:
+        if new_client.update_discount(wb_id, new_discount):
+            return HttpResponse(f"Установлена {new_discount}% скидка")
+    return HttpResponse("Не удалось обновить :(")
+
+
+
 
 
 @login_required
@@ -150,11 +173,12 @@ def bought(request):
 @login_required
 def api(request):
     logger.info("Api page requested...")
-    form = ApiForm(request.POST or None)
+
     if ApiKey.objects.filter(user=request.user.id).exists():
         api = ApiKey.objects.get(user=request.user.id)
     else:
-        api = False
+        api = None
+    form = ApiForm(request.POST or None, instance=api)
     if form.is_valid():
         form.instance.user = request.user
         form.save()
