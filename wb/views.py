@@ -13,6 +13,7 @@ from loguru import logger
 from _settings.settings import redis_client
 from wb.forms import ApiForm
 from wb.models import ApiKey
+from wb.services.marketplace import get_marketplace_objects
 from wb.services.new_api_client import NewApiClient
 from wb.services.services import (
     api_key_required,
@@ -112,6 +113,60 @@ def stock(request):
     data["total"] = total_qty
     data["can_be_ordered_qty"] = can_be_ordered_qty
     data["total_value"] = total_value
+
+    return render(
+        request,
+        "stock.html",
+        data,
+    )
+
+
+@login_required
+@api_key_required
+def marketplace(request):
+    """Display products in marketplace."""
+    logger.info("View: requested marketplace")
+    token = ApiKey.objects.get(user=request.user.id).api
+
+    # Statistics have 3 requests that take 30+ seconds, so we start another thread pool here
+    # Tread doesn't support return value!
+    pool = ThreadPool(processes=1)
+    async_result = pool.apply_async(get_info_widget, (token,))
+    # and actually 3 more threads inside. Magic!
+
+    # So here actually we have 4 concurrent requests
+    products = get_marketplace_objects(token)
+    # products = add_weekly_sales(token, products)
+    products = list(products.values())
+    products = sorted(products, key=lambda product: product.stock, reverse=True)
+
+    # Ready to paginate
+    paginator = Paginator(products, 32)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+
+    # Get our statistics
+    data = async_result.get()
+    logger.info(f"{data=}")
+
+    # General statistics
+    total_sku = 0
+    total_qty = 0
+    total_value = 0
+    can_be_ordered_qty = 0
+    for product in products:
+        total_sku += 1
+        total_qty += product.stock
+        if (product.stock - product.in_way_to_client - product.in_way_from_client) > 0:
+            can_be_ordered_qty += 1
+        total_value += product.stock * product.price
+
+    data["data"] = page_obj
+    data["total_sku"] = total_sku
+    data["total"] = total_qty
+    data["can_be_ordered_qty"] = can_be_ordered_qty
+    data["total_value"] = total_value
+    data["marketplace"] = True
 
     return render(
         request,

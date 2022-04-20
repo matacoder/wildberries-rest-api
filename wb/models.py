@@ -29,6 +29,7 @@ class Product:
     barcode: str = ""
     days_on_site: str = ""
     has_been_updated: dict = field(default_factory=dict)
+    name: str = ""
 
     @property
     def stock(self):

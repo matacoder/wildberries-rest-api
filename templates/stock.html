@@ -7,7 +7,11 @@
     {% include 'includes/revenue.html' %}
     <br/>
     <h1 class="title">
+    {% if marketplace is not True %}
         Остатки на складах Вайлдберриз + продажи за 14 дней
+    {% else %}
+        Маркетплейс: остатки на складах поставщика
+    {% endif %}
     </h1>
     <div class="box">
         {{ total_sku }} разных артикулов, {{ can_be_ordered_qty }} штук можно заказать (не в пути)<br>
