@@ -1,21 +1,15 @@
 import datetime
 import functools
-import json
-import pickle
 import time
-from threading import Thread
-from typing import Callable
 
 import requests
 from django.shortcuts import redirect
 from loguru import logger
 
-from _settings.settings import STATISTIC_REFRESH_THRESHOLD, redis_client
 from wb.models import ApiKey
+from wb.services.redis import redis_cache_decorator
 
 RETRY_DELAY = 0.1
-
-running_threads = set()
 
 
 def api_key_required(func):
@@ -75,62 +69,7 @@ class RestClient:
         return self.connect(params, self.base_url + url)
 
 
-def redis_cache_decorator(func: Callable):
-    @functools.wraps(func)
-    def wrapper(token, *args, **kwargs):
-        # logger.info(f"Redis decorator for {func.__name__} with {token=}")
-        api_key = token
-        args_key = "args" + json.dumps(args) + json.dumps(kwargs)
-        redis_full_key = f"{api_key}:{func.__name__}:{args_key}"
-        redis_timestamp_key = f"{redis_full_key}:updated_at"
-
-        cached_result = redis_client.get(redis_full_key)
-        timestamp = redis_client.get(redis_timestamp_key)
-        current_time = datetime.datetime.now()
-
-        threshold = datetime.timedelta(minutes=STATISTIC_REFRESH_THRESHOLD)
-
-        def run_and_cache():
-            global running_threads
-            running_threads.add(redis_full_key)
-            result = func(token, *args, **kwargs)
-            redis_client.set(redis_full_key, json.dumps(result))
-            redis_client.set(redis_timestamp_key, pickle.dumps(current_time))
-            # logger.info(
-            #     f"Redis decorator for {func.__name__}: finished calc in thread!"
-            # )
-            running_threads.remove(redis_full_key)
-            return result
-
-        if not cached_result:
-            # logger.info(f"Redis decorator for {func.__name__}: not found, calculating")
-            cached_result = run_and_cache()
-        else:
-            cached_result = json.loads(cached_result)
-            if redis_full_key not in running_threads:
-                if not timestamp:
-                    timestamp = current_time - datetime.timedelta(minutes=11)
-                    redis_client.set(redis_timestamp_key, pickle.dumps(current_time))
-                else:
-                    timestamp = pickle.loads(timestamp)
-                if current_time - timestamp > threshold:
-                    # logger.info(
-                    # f"Redis decorator for {func.__name__}: found! Running update in thread..."
-                    # )
-                    thread = Thread(target=run_and_cache)
-                    thread.start()
-                # else:
-                #     logger.info(
-                #         f"Less than {STATISTIC_REFRESH_THRESHOLD} minutes passed since previous check for {func.__name__}"
-                #     )
-            # else:
-            # logger.info(f"Redis decorator for {func.__name__}: is already running")
-        return cached_result
-
-    return wrapper
-
-
-@redis_cache_decorator
+@redis_cache_decorator()
 def get_weekly_payment(token):
     logger.info("Getting weekly payment...")
     data = get_bought_products(token, week=True, flag=0)
@@ -140,7 +79,7 @@ def get_weekly_payment(token):
     return 0
 
 
-@redis_cache_decorator
+@redis_cache_decorator()
 def get_ordered_sum(token):
     logger.info("Getting ordered payment...")
     data = get_ordered_products(token)
@@ -151,7 +90,7 @@ def get_ordered_sum(token):
     return 0
 
 
-@redis_cache_decorator
+@redis_cache_decorator()
 def get_bought_sum(token):
     logger.info("Getting bought payment...")
     data = get_bought_products(token)
@@ -160,7 +99,7 @@ def get_bought_sum(token):
     return 0
 
 
-@redis_cache_decorator
+@redis_cache_decorator()
 def get_ordered_products(token, week=False, flag=1, days=None):
     client = RestClient(token)
     data = client.get_ordered(url="orders", week=week, flag=flag, days=days)
@@ -175,7 +114,7 @@ def get_ordered_products(token, week=False, flag=1, days=None):
     return data.json()
 
 
-@redis_cache_decorator
+@redis_cache_decorator()
 def get_bought_products(token, week=False, flag=1):
     client = RestClient(token)
     data = client.get_ordered(url="sales", week=week, flag=flag)
@@ -190,7 +129,7 @@ def get_bought_products(token, week=False, flag=1):
     return data.json()
 
 
-@redis_cache_decorator
+@redis_cache_decorator()
 def get_stock_products(token):
     """Getting products in stock."""
     logger.info("Getting products in stock.")

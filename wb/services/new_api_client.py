@@ -13,24 +13,22 @@ class NewApiClient:
         return {
             "Authorization": self.token,
             "accept": "application/json",
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
         }
 
     def update_discount(self, wb_id, new_discount):
         url = self.base + "v1/updateDiscounts"
-        data = [
-            {
-                "discount": int(new_discount),
-                "nm": int(wb_id)
-            }
-        ]
+        data = [{"discount": int(new_discount), "nm": int(wb_id)}]
 
-        response = requests.post(url, data=json.dumps(data), headers=self.build_headers())
+        response = requests.post(
+            url, data=json.dumps(data), headers=self.build_headers()
+        )
         logger.info(f"{response.status_code}, message: {response.json()}")
         if response.status_code == 200:
-            return True
-
-        return False
+            return True, "Success"
+        errors = response.json().get("errors")
+        error = errors[0] if errors else "Неизвестная ошибка"
+        return False, error
 
     def get_prices(self):
         url = self.base + "v1/info"

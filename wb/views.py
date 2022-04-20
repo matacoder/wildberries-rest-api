@@ -6,14 +6,18 @@ from multiprocessing.pool import ThreadPool
 
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
-from django.http import HttpResponse, JsonResponse
-from django.shortcuts import render, redirect
+from django.http import HttpResponse
+from django.shortcuts import render
 from loguru import logger
 
 from _settings.settings import redis_client
 from wb.forms import ApiForm
 from wb.models import ApiKey
-from wb.services.marketplace import get_marketplace_objects, update_prices
+from wb.services.marketplace import (
+    get_marketplace_objects,
+    update_warehouse_prices,
+    update_marketplace_prices,
+)
 from wb.services.new_api_client import NewApiClient
 from wb.services.services import (
     api_key_required,
@@ -37,13 +41,13 @@ def index(request):
 @api_key_required
 def update_discount(request):
     tokens = ApiKey.objects.get(user=request.user)
-    new_token = tokens.new_api
+    jwt_token = tokens.new_api
     x64_token = tokens.api
 
-    if not new_token:
+    if not jwt_token:
         return HttpResponse("Нужно указать API-ключ!")
 
-    new_client = NewApiClient(new_token)
+    new_client = NewApiClient(jwt_token)
     wb_id = request.GET.get("wb_id")
 
     new_price = int(request.GET.get("new_price"))
@@ -54,18 +58,18 @@ def update_discount(request):
     else:
         new_discount = int(request.GET.get("new_discount"))
     if new_discount is not None:
-        if new_client.update_discount(wb_id, new_discount):
+        success, message = new_client.update_discount(wb_id, new_discount)
+        if success:
             redis_key = f"{x64_token}:update_discount:{wb_id}"
-            redis_value = pickle.dumps({
-                "new_price": new_price,
-                "new_discount": new_discount,
-            })
-            redis_client.set(redis_key, redis_value, ex=60*60*4)
+            redis_value = pickle.dumps(
+                {
+                    "new_price": new_price,
+                    "new_discount": new_discount,
+                }
+            )
+            redis_client.set(redis_key, redis_value, ex=60 * 60 * 4)
             return HttpResponse(f"Установлена {new_discount}% скидка")
-    return HttpResponse("Не удалось обновить :(")
-
-
-
+        return HttpResponse(message)
 
 
 @login_required
@@ -84,7 +88,7 @@ def stock(request):
     # So here actually we have 4 concurrent requests
     products = get_stock_objects(token)
     products = add_weekly_sales(token, products)
-    products = update_prices(token, products)
+    products = update_warehouse_prices(token, products)
     products = list(products.values())
     products = sorted(products, key=lambda product: product.stock, reverse=True)
 
@@ -137,7 +141,7 @@ def marketplace(request):
 
     # So here actually we have 4 concurrent requests
     products = get_marketplace_objects(token)
-    products = update_prices(token, products)
+    products = update_marketplace_prices(token, products)
     products = list(products.values())
     products = sorted(products, key=lambda product: product.stock, reverse=True)
 

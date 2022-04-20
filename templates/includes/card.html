@@ -46,9 +46,10 @@
                                 </p>
                                     </div>
                                 <p class="control">
-                                    <button class="button is-info is-small" type="submit" id="discount_update_result_{{ item.nm_id }}"
+                                    <button class="button is-info is-small" type="submit"
                                             value="">Установить через %</button>
                                 </p>
+                                <span id="discount_update_result_{{ item.nm_id }}"></span>
                             </form>
                             {% if item.has_been_updated %}
                                 <div class="tag is-danger">

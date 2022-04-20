@@ -7,10 +7,10 @@ from wb.models import Size, Sale, Product
 from wb.services.services import get_ordered_products, get_stock_products
 
 
-def get_stock_objects(token):
+def get_stock_objects(x64_token):
     """Proper way to deal with products."""
     logger.info("Getting stock as objects")
-    raw_stock = get_stock_products(token)
+    raw_stock = get_stock_products(x64_token)
     stock_products = dict()
     for item in raw_stock:
         # Get or create new product:
@@ -31,7 +31,7 @@ def get_stock_objects(token):
         product.barcode = item.get("barcode", 0)
         product.days_on_site = item.get("daysOnSite", 0)
 
-        redis_key = f"{token}:update_discount:{product.nm_id}"
+        redis_key = f"{x64_token}:update_discount:{product.nm_id}"
         has_been_updated = redis_client.get(redis_key)
         if has_been_updated is not None:
             logger.info(f"Found update info for {product.nm_id}")

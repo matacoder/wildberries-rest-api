@@ -28,7 +28,7 @@ SECRET_KEY = os.environ.get("SECRET_KEY")
 
 REDIS_PASSWORD = os.environ.get("REDIS_PASSWORD")
 STATISTIC_REFRESH_THRESHOLD = 10
-
+running_threads = set()
 
 redis_client: redis.Redis = redis.Redis(
     host="cache", port=6379, password=REDIS_PASSWORD

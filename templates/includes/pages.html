@@ -1,10 +1,10 @@
 {% load custom_tags %}
 <nav class="pagination is-large" role="navigation" aria-label="pagination">
     {% if data.has_previous %}
-        <a class="pagination-previous" href="?{% url_replace request 'page' data.previous_page_number %}">Previous</a>
+        <a class="pagination-previous" href="?{% url_replace request 'page' data.previous_page_number %}">Предыдущая</a>
     {% endif %}
     {% if data.has_next %}
-        <a class="pagination-next" href="?{% url_replace request 'page' data.next_page_number %}">Next page</a>
+        <a class="pagination-next" href="?{% url_replace request 'page' data.next_page_number %}">Следующая</a>
     {% endif %}
     <ul class="pagination-list">
         {% if data.has_previous %}
@@ -16,7 +16,7 @@
             </li>
         {% endif %}
 
-        <li><a class="pagination-link is-current" aria-label="Page {{ data.number }}"
+        <li><a class="pagination-link is-current" aria-label="Страница {{ data.number }}"
                aria-current="page">{{ data.number }}</a>
         </li>
         {% if data.has_next %}

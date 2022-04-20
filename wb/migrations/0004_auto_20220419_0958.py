@@ -6,18 +6,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('wb', '0003_alter_apikey_user'),
+        ("wb", "0003_alter_apikey_user"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='apikey',
-            name='new_api',
-            field=models.CharField(default='', max_length=400),
+            model_name="apikey",
+            name="new_api",
+            field=models.CharField(default="", max_length=400),
         ),
         migrations.AlterField(
-            model_name='apikey',
-            name='api',
+            model_name="apikey",
+            name="api",
             field=models.CharField(max_length=200),
         ),
     ]

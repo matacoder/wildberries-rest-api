@@ -8,7 +8,9 @@ User = get_user_model()
 
 class ApiKey(models.Model):
     api = models.CharField(max_length=200, verbose_name="Ключ API (x64)")
-    new_api = models.CharField(max_length=400, default="", verbose_name="Ключ нового API (JWT)")
+    new_api = models.CharField(
+        max_length=400, default="", verbose_name="Ключ нового API (JWT)"
+    )
     user = models.OneToOneField(User, on_delete=models.CASCADE, unique=True)
 
     def __str__(self):
@@ -18,6 +20,7 @@ class ApiKey(models.Model):
 @dataclass
 class Product:
     """WB product."""
+
     nm_id: int  # nmId (Wildberries sku number)
     supplier_article: str = ""
     full_price: int = 0  # Price without discount
@@ -39,6 +42,7 @@ class Product:
 @dataclass
 class Size:
     """WB size."""
+
     tech_size: str = 0  # techSize
     quantity_full: int = 0  # quantityFull
     sales: list = field(default_factory=list)
@@ -52,6 +56,7 @@ class Size:
 @dataclass
 class Sale:
     """WB sale."""
+
     date: str = ""
     quantity: int = 0
     price_with_disc: float = 0
@@ -62,5 +67,6 @@ class Sale:
 @dataclass
 class Order:
     """WB sale with Product attached."""
+
     quantity: int = 0
     product: Product = None

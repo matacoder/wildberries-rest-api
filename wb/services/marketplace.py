@@ -3,6 +3,7 @@ from loguru import logger
 
 from wb.models import ApiKey, Product, Size
 from wb.services.new_api_client import NewApiClient
+from wb.services.redis import redis_cache_decorator
 
 
 def get_marketplace_objects(token):
@@ -10,13 +11,13 @@ def get_marketplace_objects(token):
     logger.info("Getting marketplace as objects")
 
     tokens = ApiKey.objects.get(api=token)
-    new_token = tokens.new_api
+    jwt_token = tokens.new_api
     # x64_token = tokens.api
 
-    if not new_token:
+    if not jwt_token:
         return HttpResponse("Нужно указать API-ключ!")
 
-    new_client = NewApiClient(new_token)
+    new_client = NewApiClient(jwt_token)
 
     raw_stock = new_client.get_stock()
     stock_products = dict()
@@ -71,3 +72,14 @@ def update_prices(token, stock_products):
             product.full_price = int(price["price"])
             product.discount = price["discount"]
     return stock_products
+
+
+@redis_cache_decorator(minutes=1)
+def update_marketplace_prices(token, stock_products):
+    """We use proxy function to cache results."""
+    return update_prices(token, stock_products)
+
+
+@redis_cache_decorator(minutes=1)
+def update_warehouse_prices(token, stock_products):
+    return update_prices(token, stock_products)
