@@ -3,8 +3,6 @@ import json
 import requests
 from loguru import logger
 
-from _settings.settings import redis_client
-
 
 class NewApiClient:
     def __init__(self, new_api_key: str):
@@ -33,6 +31,15 @@ class NewApiClient:
             return True
 
         return False
+
+    def get_prices(self):
+        url = self.base + "v1/info"
+
+        response = requests.get(url, headers=self.build_headers())
+
+        if response.status_code == 200:
+            return response.json()
+        return []
 
     def get_stock(self):
         url = f"https://suppliers-api.wildberries.ru/api/v2/stocks"

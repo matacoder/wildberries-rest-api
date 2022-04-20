@@ -13,7 +13,7 @@ from loguru import logger
 from _settings.settings import redis_client
 from wb.forms import ApiForm
 from wb.models import ApiKey
-from wb.services.marketplace import get_marketplace_objects
+from wb.services.marketplace import get_marketplace_objects, update_prices
 from wb.services.new_api_client import NewApiClient
 from wb.services.services import (
     api_key_required,
@@ -84,6 +84,7 @@ def stock(request):
     # So here actually we have 4 concurrent requests
     products = get_stock_objects(token)
     products = add_weekly_sales(token, products)
+    products = update_prices(token, products)
     products = list(products.values())
     products = sorted(products, key=lambda product: product.stock, reverse=True)
 
@@ -136,7 +137,7 @@ def marketplace(request):
 
     # So here actually we have 4 concurrent requests
     products = get_marketplace_objects(token)
-    # products = add_weekly_sales(token, products)
+    products = update_prices(token, products)
     products = list(products.values())
     products = sorted(products, key=lambda product: product.stock, reverse=True)
 

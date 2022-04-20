@@ -51,3 +51,23 @@ def get_marketplace_objects(token):
         product.sizes[size].quantity_full = item.get("stock", 0)
 
     return stock_products
+
+
+def update_prices(token, stock_products):
+    tokens = ApiKey.objects.get(api=token)
+    new_token = tokens.new_api
+    if not new_token:
+        return HttpResponse("Нужно указать API-ключ!")
+
+    new_client = NewApiClient(new_token)
+
+    prices = new_client.get_prices()
+
+    for price in prices:
+        product = stock_products.get(price["nmId"])
+
+        if product:
+            product.price = int(price["price"] * ((100 - price["discount"]) / 100))
+            product.full_price = int(price["price"])
+            product.discount = price["discount"]
+    return stock_products
