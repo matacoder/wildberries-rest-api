@@ -4,11 +4,9 @@ import time
 from loguru import logger
 
 from _settings.settings import redis_client
-from wb.models import Size, Sale, Product
-
-
+from wb.models import Product, Sale, Size
 from wb.services.redis import redis_cache_decorator
-from wb.services.rest_client.x64_client import X64ApiClient, RETRY_DELAY
+from wb.services.rest_client.x64_client import RETRY_DELAY, X64ApiClient
 
 
 def get_stock_objects(x64_token):

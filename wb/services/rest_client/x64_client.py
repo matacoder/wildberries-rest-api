@@ -1,5 +1,4 @@
 import requests
-
 from loguru import logger
 
 from wb.services.tools import get_date
@@ -9,6 +8,7 @@ RETRY_DELAY = 0.1
 
 class X64ApiClient:
     """Get WB stock statistics."""
+
     def __init__(self, token):
         self.token = token
         self.base_url = "https://suppliers-stats.wildberries.ru/api/v1/supplier/"

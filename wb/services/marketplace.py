@@ -2,7 +2,6 @@ from django.http import HttpResponse
 from loguru import logger
 
 from wb.models import ApiKey, Product, Size
-
 from wb.services.redis import redis_cache_decorator
 from wb.services.rest_client.jwt_client import JWTApiClient
 

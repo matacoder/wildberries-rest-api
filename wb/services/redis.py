@@ -1,13 +1,13 @@
+import datetime
 import functools
 import json
 import pickle
-import datetime
 from threading import Thread
 from typing import Callable
 
 from _settings.settings import (
-    redis_client,
     STATISTIC_REFRESH_THRESHOLD,
+    redis_client,
     running_threads,
 )
 

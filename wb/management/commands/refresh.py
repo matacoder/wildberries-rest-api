@@ -5,7 +5,6 @@ from django.core.management.base import BaseCommand
 from loguru import logger
 
 from _settings.settings import STATISTIC_REFRESH_THRESHOLD
-
 from wb.models import ApiKey
 from wb.services.services import (
     get_bought_products,

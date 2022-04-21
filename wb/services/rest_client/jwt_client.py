@@ -8,6 +8,7 @@ from wb.services.tools import get_date
 
 class JWTApiClient:
     """Get Marketplace Statistics."""
+
     def __init__(self, new_api_key: str):
         self.token = new_api_key
         self.base = "https://suppliers-api.wildberries.ru/public/api/"
@@ -80,6 +81,3 @@ class JWTApiClient:
             "take": 1000,
             "date_start": get_date(days=14),
         }
-
-
-

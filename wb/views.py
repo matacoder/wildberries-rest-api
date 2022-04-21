@@ -15,20 +15,21 @@ from wb.forms import ApiForm
 from wb.models import ApiKey
 from wb.services.marketplace import (
     get_marketplace_objects,
-    update_warehouse_prices,
     update_marketplace_prices,
+    update_warehouse_prices,
 )
 from wb.services.rest_client.jwt_client import JWTApiClient
 from wb.services.tools import api_key_required
 from wb.services.warehouse import (
+    add_weekly_sales,
     get_bought_products,
     get_bought_sum,
     get_ordered_products,
     get_ordered_sum,
+    get_stock_objects,
     get_stock_products,
     get_weekly_payment,
 )
-from wb.services.warehouse import get_stock_objects, add_weekly_sales
 
 
 def index(request):
