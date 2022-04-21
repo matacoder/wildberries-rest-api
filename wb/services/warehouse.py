@@ -1,10 +1,14 @@
 import pickle
+import time
 
 from loguru import logger
 
 from _settings.settings import redis_client
 from wb.models import Size, Sale, Product
-from wb.services.services import get_ordered_products, get_stock_products
+
+
+from wb.services.redis import redis_cache_decorator
+from wb.services.rest_client.x64_client import X64ApiClient, RETRY_DELAY
 
 
 def get_stock_objects(x64_token):
@@ -82,3 +86,82 @@ def add_weekly_sales(token, stock_products: dict):
         product.size.sales.append(sale)
 
     return stock_products
+
+
+@redis_cache_decorator()
+def get_weekly_payment(token):
+    logger.info("Getting weekly payment...")
+    data = get_bought_products(token, week=True, flag=0)
+    if data:
+        payment = sum((x["forPay"]) for x in data)
+        return int(payment)
+    return 0
+
+
+@redis_cache_decorator()
+def get_ordered_sum(token):
+    logger.info("Getting ordered payment...")
+    data = get_ordered_products(token)
+    if data:
+        return int(
+            sum((x["totalPrice"] * (1 - x["discountPercent"] / 100)) for x in data)
+        )
+    return 0
+
+
+@redis_cache_decorator()
+def get_bought_sum(token):
+    logger.info("Getting bought payment...")
+    data = get_bought_products(token)
+    if data:
+        return int(sum((x["forPay"]) for x in data))
+    return 0
+
+
+@redis_cache_decorator()
+def get_ordered_products(token, week=False, flag=1, days=None):
+    client = X64ApiClient(token)
+    data = client.get_ordered(url="orders", week=week, flag=flag, days=days)
+    attempt = 0
+    while data.status_code != 200:
+        attempt += 1
+        if attempt > 10:
+            return {}
+        logger.info("WB endpoint is faulty. Retrying...")
+        time.sleep(RETRY_DELAY)
+        data = client.get_ordered(url="orders", week=week, flag=flag, days=days)
+    return data.json()
+
+
+@redis_cache_decorator()
+def get_bought_products(token, week=False, flag=1):
+    client = X64ApiClient(token)
+    data = client.get_ordered(url="sales", week=week, flag=flag)
+    attempt = 0
+    while data.status_code != 200:
+        attempt += 1
+        if attempt > 10:
+            return {}
+        logger.info("WB endpoint is faulty. Retrying...")
+        time.sleep(RETRY_DELAY)
+        data = client.get_ordered(url="sales", week=week, flag=flag)
+    return data.json()
+
+
+@redis_cache_decorator()
+def get_stock_products(token):
+    """Getting products in stock."""
+    logger.info("Getting products in stock.")
+    client = X64ApiClient(token)
+    data = client.get_stock()
+    logger.info(data)
+    attempt = 0
+    while data.status_code != 200:
+        attempt += 1
+        if attempt > 10:
+            return {}
+        logger.info("WB endpoint is faulty. Retrying...")
+        time.sleep(RETRY_DELAY)
+        data = client.get_stock()
+    logger.info(data.text[:100])
+    return data.json()

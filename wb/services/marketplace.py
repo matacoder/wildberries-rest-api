@@ -2,8 +2,9 @@ from django.http import HttpResponse
 from loguru import logger
 
 from wb.models import ApiKey, Product, Size
-from wb.services.new_api_client import NewApiClient
+
 from wb.services.redis import redis_cache_decorator
+from wb.services.rest_client.jwt_client import JWTApiClient
 
 
 def get_marketplace_objects(token):
@@ -17,7 +18,7 @@ def get_marketplace_objects(token):
     if not jwt_token:
         return HttpResponse("Нужно указать API-ключ!")
 
-    new_client = NewApiClient(jwt_token)
+    new_client = JWTApiClient(jwt_token)
 
     raw_stock = new_client.get_stock()
     stock_products = dict()
@@ -60,7 +61,7 @@ def update_prices(token, stock_products):
     if not new_token:
         return HttpResponse("Нужно указать API-ключ!")
 
-    new_client = NewApiClient(new_token)
+    new_client = JWTApiClient(new_token)
 
     prices = new_client.get_prices()
 
@@ -83,3 +84,7 @@ def update_marketplace_prices(token, stock_products):
 @redis_cache_decorator(minutes=1)
 def update_warehouse_prices(token, stock_products):
     return update_prices(token, stock_products)
+
+
+def update_marketplace_sales(token, stock_products):
+    pass

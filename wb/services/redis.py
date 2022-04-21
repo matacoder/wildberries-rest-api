@@ -78,7 +78,7 @@ def redis_cache_decorator(minutes=STATISTIC_REFRESH_THRESHOLD):
                         thread.start()
                     # else:
                     #     logger.info(
-                    #         f"Less than {STATISTIC_REFRESH_THRESHOLD} minutes passed since previous check for {func.__name__}"
+                    #         f"Less than {minutes} minutes passed since previous check for {func.__name__}"
                     #     )
                 # else:
                 # logger.info(f"Redis decorator for {func.__name__}: is already running")

@@ -18,9 +18,9 @@ from wb.services.marketplace import (
     update_warehouse_prices,
     update_marketplace_prices,
 )
-from wb.services.new_api_client import NewApiClient
-from wb.services.services import (
-    api_key_required,
+from wb.services.rest_client.jwt_client import JWTApiClient
+from wb.services.tools import api_key_required
+from wb.services.warehouse import (
     get_bought_products,
     get_bought_sum,
     get_ordered_products,
@@ -47,7 +47,7 @@ def update_discount(request):
     if not jwt_token:
         return HttpResponse("Нужно указать API-ключ!")
 
-    new_client = NewApiClient(jwt_token)
+    new_client = JWTApiClient(jwt_token)
     wb_id = request.GET.get("wb_id")
 
     new_price = int(request.GET.get("new_price"))

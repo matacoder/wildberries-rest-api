@@ -3,8 +3,11 @@ import json
 import requests
 from loguru import logger
 
+from wb.services.tools import get_date
 
-class NewApiClient:
+
+class JWTApiClient:
+    """Get Marketplace Statistics."""
     def __init__(self, new_api_key: str):
         self.token = new_api_key
         self.base = "https://suppliers-api.wildberries.ru/public/api/"
@@ -68,3 +71,15 @@ class NewApiClient:
             attempt += 1
         logger.info(f"Got stocks from marketplace {len(stock)} pcs.")
         return stock
+
+    def get_orders(self, days):
+        url = "https://suppliers-api.wildberries.ru/api/v2/orders"
+
+        get_params = {
+            "skip": 0,
+            "take": 1000,
+            "date_start": get_date(days=14),
+        }
+
+
+
