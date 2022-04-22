@@ -47,6 +47,7 @@ class Size:
     quantity_full: int = 0  # quantityFull
     sales: list = field(default_factory=list)
     orders: list = field(default_factory=list)
+    barcode: str = ""
 
     @property
     def total_sales(self):

@@ -13,7 +13,6 @@ import os
 from pathlib import Path
 
 import redis
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 from django.urls import reverse
 

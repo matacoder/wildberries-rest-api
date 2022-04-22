@@ -6,14 +6,9 @@ from loguru import logger
 
 from _settings.settings import STATISTIC_REFRESH_THRESHOLD
 from wb.models import ApiKey
-from wb.services.services import (
-    get_bought_products,
-    get_bought_sum,
-    get_ordered_products,
-    get_ordered_sum,
-    get_stock_products,
-    get_weekly_payment,
-)
+from wb.services.warehouse import (get_bought_products, get_bought_sum,
+                                   get_ordered_products, get_ordered_sum,
+                                   get_stock_products, get_weekly_payment)
 
 
 class Command(BaseCommand):

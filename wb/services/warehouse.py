@@ -14,6 +14,7 @@ def get_stock_objects(x64_token):
     logger.info("Getting stock as objects")
     raw_stock = get_stock_products(x64_token)
     stock_products = dict()
+
     for item in raw_stock:
         # Get or create new product:
         product = stock_products.get(item["nmId"], None)

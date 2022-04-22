@@ -76,8 +76,30 @@ class JWTApiClient:
     def get_orders(self, days):
         url = "https://suppliers-api.wildberries.ru/api/v2/orders"
 
-        get_params = {
-            "skip": 0,
-            "take": 1000,
-            "date_start": get_date(days=14),
-        }
+        offset = 200
+
+        def get_page(skip=0):
+            get_params = {
+                "skip": skip,
+                "take": offset,
+                "date_start": get_date(days=14),
+            }
+            return requests.get(url, get_params, headers=self.build_headers())
+
+        response = get_page()
+        if response.status_code != 200:
+            logger.info(f"{response.status_code}, {response.text}")
+            return []
+
+        orders = []
+        batch = response.json()
+        total = int(batch.get("total"))
+        logger.info(f"Total {total} products")
+        attempt = 1
+
+        orders += batch["orders"]
+        while total > offset * attempt:
+            orders += get_page(offset * attempt).json()["orders"]
+            attempt += 1
+        logger.info(f"Got orders from marketplace {len(orders)} pcs.")
+        return orders

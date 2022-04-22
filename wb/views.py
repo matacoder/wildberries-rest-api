@@ -13,23 +13,16 @@ from loguru import logger
 from _settings.settings import redis_client
 from wb.forms import ApiForm
 from wb.models import ApiKey
-from wb.services.marketplace import (
-    get_marketplace_objects,
-    update_marketplace_prices,
-    update_warehouse_prices,
-)
+from wb.services.marketplace import (get_marketplace_objects,
+                                     update_marketplace_prices,
+                                     update_marketplace_sales,
+                                     update_warehouse_prices)
 from wb.services.rest_client.jwt_client import JWTApiClient
 from wb.services.tools import api_key_required
-from wb.services.warehouse import (
-    add_weekly_sales,
-    get_bought_products,
-    get_bought_sum,
-    get_ordered_products,
-    get_ordered_sum,
-    get_stock_objects,
-    get_stock_products,
-    get_weekly_payment,
-)
+from wb.services.warehouse import (add_weekly_sales, get_bought_products,
+                                   get_bought_sum, get_ordered_products,
+                                   get_ordered_sum, get_stock_objects,
+                                   get_stock_products, get_weekly_payment)
 
 
 def index(request):
@@ -132,17 +125,21 @@ def stock(request):
 def marketplace(request):
     """Display products in marketplace."""
     logger.info("View: requested marketplace")
-    token = ApiKey.objects.get(user=request.user.id).api
+    tokens = ApiKey.objects.get(user=request.user)
+    jwt_token = tokens.new_api
+    x64_token = tokens.api
 
     # Statistics have 3 requests that take 30+ seconds, so we start another thread pool here
     # Tread doesn't support return value!
     pool = ThreadPool(processes=1)
-    async_result = pool.apply_async(get_info_widget, (token,))
+    async_result = pool.apply_async(get_info_widget, (x64_token,))
     # and actually 3 more threads inside. Magic!
 
     # So here actually we have 4 concurrent requests
-    products = get_marketplace_objects(token)
-    products = update_marketplace_prices(token, products)
+    products, barcode_hashmap = get_marketplace_objects(x64_token)
+    products = update_marketplace_prices(x64_token, products)
+    products = update_marketplace_sales(jwt_token, products, barcode_hashmap)
+
     products = list(products.values())
     products = sorted(products, key=lambda product: product.stock, reverse=True)
 
