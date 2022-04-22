@@ -38,3 +38,22 @@ Live version is here: [wb.matakov.com](https://wb.matakov.com)
 4) Создайте файл `.env`, за основу можно взять [образец отсюда](https://github.com/matacoder/django-docker/blob/master/.env)
 5) Запустите `docker compose up`
 6) Сайт будет доступен по адресу: `127.0.0.1:1112`
+
+# Environment variables (переменные окружения)
+
+Save them to `.env` file (сохраните их в файл)
+
+* DB_ENGINE=django.db.backends.postgresql
+* DB_NAME=postgres
+* POSTGRES_USER=postgres
+* POSTGRES_PASSWORD=please_use_secure_password
+* DB_HOST=db
+* DB_PORT=5432
+* SECRET_KEY=please_use_secure_password
+* DJANGO_SUPERUSER_PASSWORD=please_use_secure_password
+* DJANGO_SUPERUSER_EMAIL=example@example.com
+* DJANGO_SUPERUSER_USERNAME=admin
+* DOCKER_USERNAME=matakov
+* DOCKER_IMAGE=wb
+* DEBUG=1
+* REDIS_PASSWORD=please_use_secure_password
