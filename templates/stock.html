@@ -18,6 +18,12 @@
         {{ total }} штук на складе и в пути,<br>
         {{ total_value|format:"{:,}" }} рублей в продажных ценах ВБ (на складе и в пути).<br>
     </div>
+    <div class="block">
+    {% for sort_param, name in sorting_lambdas.items %}
+        <a class="button is-light" href="?filter_by={{ sort_param }}">{{ name.desc }}</a>
+
+    {% endfor %}
+    </div>
     {% include "includes/card.html" %}
 
 {% endblock %}

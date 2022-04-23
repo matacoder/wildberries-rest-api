@@ -36,16 +36,7 @@ def get_marketplace_objects(token):
             )
             stock_products[product.nm_id] = product
 
-        # Update product
-        # product.price = int(item["Price"] * ((100 - item["Discount"]) / 100))
-        # product.full_price = int(item["Price"])
-        # product.discount = item["Discount"]
-        # product.in_way_to_client = item.get("inWayToClient", 0)
-        # product.in_way_from_client = item.get("inWayFromClient", 0)
-
         product.name = item.get("name", 0)
-
-        # product.days_on_site = item.get("daysOnSite", 0)
 
         # Get or create new size
         size = item.get("size", 0)

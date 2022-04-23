@@ -13,16 +13,18 @@ from loguru import logger
 from _settings.settings import redis_client
 from wb.forms import ApiForm
 from wb.models import ApiKey
+from wb.services.filters import sort_products, sorting_lambdas
 from wb.services.marketplace import (get_marketplace_objects,
                                      update_marketplace_prices,
                                      update_marketplace_sales,
                                      update_warehouse_prices)
 from wb.services.rest_client.jwt_client import JWTApiClient
+from wb.services.statistics import get_stock_statistics, get_sales_statistics
 from wb.services.tools import api_key_required
 from wb.services.warehouse import (add_weekly_sales, get_bought_products,
-                                   get_bought_sum, get_ordered_products,
-                                   get_ordered_sum, get_stock_objects,
-                                   get_stock_products, get_weekly_payment)
+                                   get_ordered_products,
+                                   get_stock_objects,
+                                   get_stock_products)
 
 
 def index(request):
@@ -76,7 +78,7 @@ def stock(request):
     # Statistics have 3 requests that take 30+ seconds, so we start another thread pool here
     # Tread doesn't support return value!
     pool = ThreadPool(processes=1)
-    async_result = pool.apply_async(get_info_widget, (token,))
+    async_result = pool.apply_async(get_sales_statistics, (token,))
     # and actually 3 more threads inside. Magic!
 
     # So here actually we have 4 concurrent requests
@@ -84,7 +86,9 @@ def stock(request):
     products = add_weekly_sales(token, products)
     products = update_warehouse_prices(token, products)
     products = list(products.values())
-    products = sorted(products, key=lambda product: product.stock, reverse=True)
+
+    filter_by = request.GET.get("filter_by", "qty")
+    products = sort_products(products, filter_by)
 
     # Ready to paginate
     paginator = Paginator(products, 32)
@@ -95,23 +99,9 @@ def stock(request):
     data = async_result.get()
     logger.info(f"{data=}")
 
-    # General statistics
-    total_sku = 0
-    total_qty = 0
-    total_value = 0
-    can_be_ordered_qty = 0
-    for product in products:
-        total_sku += 1
-        total_qty += product.stock
-        if (product.stock - product.in_way_to_client - product.in_way_from_client) > 0:
-            can_be_ordered_qty += 1
-        total_value += product.stock * product.price
-
     data["data"] = page_obj
-    data["total_sku"] = total_sku
-    data["total"] = total_qty
-    data["can_be_ordered_qty"] = can_be_ordered_qty
-    data["total_value"] = total_value
+    data = data | get_stock_statistics(products)
+    data["sorting_lambdas"] = sorting_lambdas
 
     return render(
         request,
@@ -132,7 +122,7 @@ def marketplace(request):
     # Statistics have 3 requests that take 30+ seconds, so we start another thread pool here
     # Tread doesn't support return value!
     pool = ThreadPool(processes=1)
-    async_result = pool.apply_async(get_info_widget, (x64_token,))
+    async_result = pool.apply_async(get_sales_statistics, (x64_token,))
     # and actually 3 more threads inside. Magic!
 
     # So here actually we have 4 concurrent requests
@@ -141,7 +131,8 @@ def marketplace(request):
     products = update_marketplace_sales(jwt_token, products, barcode_hashmap)
 
     products = list(products.values())
-    products = sorted(products, key=lambda product: product.stock, reverse=True)
+    filter_by = request.GET.get("filter_by", "qty")
+    products = sort_products(products, filter_by)
 
     # Ready to paginate
     paginator = Paginator(products, 32)
@@ -152,23 +143,11 @@ def marketplace(request):
     data = async_result.get()
     logger.info(f"{data=}")
 
-    # General statistics
-    total_sku = 0
-    total_qty = 0
-    total_value = 0
-    can_be_ordered_qty = 0
-    for product in products:
-        total_sku += 1
-        total_qty += product.stock
-        if (product.stock - product.in_way_to_client - product.in_way_from_client) > 0:
-            can_be_ordered_qty += 1
-        total_value += product.stock * product.price
-
     data["data"] = page_obj
-    data["total_sku"] = total_sku
-    data["total"] = total_qty
-    data["can_be_ordered_qty"] = can_be_ordered_qty
-    data["total_value"] = total_value
+    logger.info(get_stock_statistics(products))
+    data = data | get_stock_statistics(products)
+    data["sorting_lambdas"] = sorting_lambdas
+
     data["marketplace"] = True
 
     return render(
@@ -176,27 +155,6 @@ def marketplace(request):
         "stock.html",
         data,
     )
-
-
-def get_info_widget(token):
-    """Concurrent request for common data."""
-    logger.info("Concurrent request for statistics...")
-    target_functions = [
-        get_weekly_payment,
-        get_ordered_sum,
-        get_bought_sum,
-    ]
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        futures = []
-        for target_function in target_functions:
-            futures.append(executor.submit(target_function, token))
-        result = {
-            "payment": futures[0].result(),
-            "ordered": futures[1].result(),
-            "bought": futures[2].result(),
-        }
-
-    return result
 
 
 @login_required
@@ -210,7 +168,7 @@ def render_page(function, request):
     # Tread doesn't support return value!
     token = ApiKey.objects.get(user=request.user.id).api
     pool = ThreadPool(processes=1)
-    async_result = pool.apply_async(get_info_widget, (token,))
+    async_result = pool.apply_async(get_sales_statistics, (token,))
     # and actually 3 more threads inside. Magic!
 
     data = function(token)
@@ -259,7 +217,7 @@ def weekly_orders_summary(request):
     # Tread doesn't support return value!
     token = ApiKey.objects.get(user=request.user.id).api
     pool = ThreadPool(processes=1)
-    async_result = pool.apply_async(get_info_widget, (token,))
+    async_result = pool.apply_async(get_sales_statistics, (token,))
     # and actually 3 more threads inside. Magic!
 
     with concurrent.futures.ThreadPoolExecutor() as executor:

@@ -38,6 +38,10 @@ class Product:
     def stock(self):
         return sum(size.quantity_full for size in self.sizes.values())
 
+    @property
+    def sales(self):
+        return sum(len(size.sales) for size in self.sizes.values())
+
 
 @dataclass
 class Size:
