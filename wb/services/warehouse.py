@@ -53,10 +53,11 @@ def get_stock_objects(x64_token):
 
 
 def add_weekly_sales(token, stock_products: dict):
-    """Add sales to stock products."""
+    """Add sales to stock products.
+    Actually not sales but orders!"""
     logger.info("Applying 14 days sales to stock...")
     # Get sales endpoint
-    raw_sales = get_ordered_products(token=token, week=False, flag=0, days=14)
+    raw_sales = get_bought_products(token=token, week=False, flag=0, days=14)
 
     for raw_sale in raw_sales:
         product: Product = stock_products.get(raw_sale["nmId"])
@@ -68,7 +69,7 @@ def add_weekly_sales(token, stock_products: dict):
             )
             stock_products[product.nm_id] = product
         size = raw_sale["techSize"]
-        product.size = product.sizes.get(
+        product.sizes[size] = product.sizes.get(
             size,
             Size(tech_size=raw_sale.get("techSize", 0)),  # Create generic size
         )
@@ -82,8 +83,41 @@ def add_weekly_sales(token, stock_products: dict):
         sale.finished_price = float(raw_sale.get("finishedPrice", 0))
         sale.for_pay = float(raw_sale.get("forPay", 0))
 
-        product.size.sales.append(sale)
+        product.sizes[size].sales.append(sale)
 
+    return stock_products
+
+
+def add_weekly_orders(token, stock_products: dict):
+    """Weekly orders."""
+    logger.info("Applying 14 days orders to stock...")
+    raw_sales = get_ordered_products(token=token, week=False, flag=0, days=14)
+
+    for raw_sale in raw_sales:
+        product: Product = stock_products.get(raw_sale["nmId"])
+        if product is None:
+            # Not sure why stock is not displaying all products
+            product = Product(
+                nm_id=raw_sale.get("nmId"),
+                supplier_article=raw_sale.get("supplierArticle"),
+            )
+            stock_products[product.nm_id] = product
+        size = raw_sale["techSize"]
+        product.sizes[size] = product.sizes.get(
+            size,
+            Size(tech_size=raw_sale.get("techSize", 0)),  # Create generic size
+        )
+
+        sale = Sale(
+            quantity=raw_sale["quantity"],
+        )
+
+        sale.date = raw_sale.get("date")
+        sale.price_with_disc = float(raw_sale.get("priceWithDisc", 0))
+        sale.finished_price = float(raw_sale.get("finishedPrice", 0))
+        sale.for_pay = float(raw_sale.get("forPay", 0))
+
+        product.sizes[size].orders.append(sale)
     return stock_products
 
 
@@ -126,24 +160,24 @@ def get_ordered_products(token, week=False, flag=1, days=None):
         attempt += 1
         if attempt > 10:
             return {}
-        logger.info("WB endpoint is faulty. Retrying...")
+        logger.info(f"Orders error {data.status_code}, Message: {data.text}")
         time.sleep(RETRY_DELAY)
         data = client.get_ordered(url="orders", week=week, flag=flag, days=days)
     return data.json()
 
 
 @redis_cache_decorator()
-def get_bought_products(token, week=False, flag=1):
+def get_bought_products(token, week=False, flag=1, days=None):
     client = X64ApiClient(token)
-    data = client.get_ordered(url="sales", week=week, flag=flag)
+    data = client.get_ordered(url="sales", week=week, flag=flag, days=days)
     attempt = 0
     while data.status_code != 200:
         attempt += 1
         if attempt > 10:
             return {}
-        logger.info("WB endpoint is faulty. Retrying...")
+        logger.info(f"Sales error {data.status_code}, Message: {data.text}")
         time.sleep(RETRY_DELAY)
-        data = client.get_ordered(url="sales", week=week, flag=flag)
+        data = client.get_ordered(url="sales", week=week, flag=flag, days=days)
     return data.json()
 
 
@@ -159,7 +193,7 @@ def get_stock_products(token):
         attempt += 1
         if attempt > 10:
             return {}
-        logger.info("WB endpoint is faulty. Retrying...")
+        logger.info(f"Stock error {data.status_code}, Message: {data.text}")
         time.sleep(RETRY_DELAY)
         data = client.get_stock()
     logger.info(data.text[:100])

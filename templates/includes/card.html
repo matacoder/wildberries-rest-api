@@ -15,7 +15,10 @@
                        href="https://www.wildberries.ru/catalog/{{ item.nm_id }}/detail.aspx?targetUrl=ES">
                         <p class="title is-5">{{ item.supplier_article }}</p></a>
                     <p class="block"> {% for size in item.sizes.values %}<span class="button is-light">
-                        <span class="tag is-success">{{ size.tech_size }}</span>&nbsp;Купили: {{ size.total_sales }} Склад: {{ size.quantity_full }}
+                        <span class="tag is-success">{{ size.tech_size }}</span>&nbsp;
+                        Выкуп: {{ size.total_sales }}
+                        {% if size.total_orders %}Заказ: {{ size.total_orders }}{% endif %}
+                        Склад: {{ size.quantity_full }}
                     </span>
                     {% endfor %}
                     </p>
@@ -23,12 +26,14 @@
                         Номер ВБ: <a target="_blank"
                                      href="https://www.wildberries.ru/catalog/{{ item.nm_id }}/detail.aspx?targetUrl=ES">{{ item.nm_id }}</a><br/>
                         ШК: {{ item.barcode }}<br/>
-                        Едет к клиентам: {{ item.in_way_to_client }},<br/>
-                        Едет от клиентов: {{ item.in_way_from_client }}<br/>
+{#                        Едет к клиентам: {{ item.in_way_to_client }},<br/>#}
+{#                        Едет от клиентов: {{ item.in_way_from_client }}<br/>#}
                         На сайте {{ item.days_on_site }} дней<br/>
                         <progress class="progress is-primary" value="{{ item.days_on_site }}"
                                   max="999"></progress>
                         Остаток: {{ item.stock }} шт.<br/>
+                        Всего купили: {{ item.sales }} шт.<br/>
+                        Всего заказали: {{ item.orders }} шт.<br/>
                         Цена старая: {{ item.full_price }} рублей <br/>
                         Цена на сайте: <span class="tag is-danger">{{ item.price }}</span> руб<br/>
                         Скидка: {{ item.discount }}%<br/>

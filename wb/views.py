@@ -19,12 +19,11 @@ from wb.services.marketplace import (get_marketplace_objects,
                                      update_marketplace_sales,
                                      update_warehouse_prices)
 from wb.services.rest_client.jwt_client import JWTApiClient
-from wb.services.statistics import get_stock_statistics, get_sales_statistics
+from wb.services.statistics import get_sales_statistics, get_stock_statistics
 from wb.services.tools import api_key_required
-from wb.services.warehouse import (add_weekly_sales, get_bought_products,
-                                   get_ordered_products,
-                                   get_stock_objects,
-                                   get_stock_products)
+from wb.services.warehouse import (add_weekly_orders, add_weekly_sales,
+                                   get_bought_products, get_ordered_products,
+                                   get_stock_objects, get_stock_products)
 
 
 def index(request):
@@ -84,6 +83,7 @@ def stock(request):
     # So here actually we have 4 concurrent requests
     products = get_stock_objects(token)
     products = add_weekly_sales(token, products)
+    products = add_weekly_orders(token, products)
     products = update_warehouse_prices(token, products)
     products = list(products.values())
 
@@ -97,7 +97,6 @@ def stock(request):
 
     # Get our statistics
     data = async_result.get()
-    logger.info(f"{data=}")
 
     data["data"] = page_obj
     data = data | get_stock_statistics(products)
@@ -139,12 +138,11 @@ def marketplace(request):
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
 
-    # Get our statistics
+    # Get our weekly revenue and sales/orders
     data = async_result.get()
-    logger.info(f"{data=}")
 
     data["data"] = page_obj
-    logger.info(get_stock_statistics(products))
+
     data = data | get_stock_statistics(products)
     data["sorting_lambdas"] = sorting_lambdas
 

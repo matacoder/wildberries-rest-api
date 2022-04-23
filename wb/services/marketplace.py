@@ -98,11 +98,16 @@ def update_marketplace_sales(token, stock_products, barcode_hashmap):
             continue
         product = stock_products.get(wm_id)
         size: Size = product.sizes.get(size)
-        size.sales.append(
-            Sale(
-                date=order.get("dateCreated"),
-                quantity=1,
-                finished_price=float(order.get("totalPrice") / 100),
-            )
+        status = int(order.get("status"))
+        sale = Sale(
+            date=order.get("dateCreated"),
+            quantity=1,
+            finished_price=float(order.get("totalPrice") / 100),
         )
+        if status == 0:
+            # Fresh new orders, must be processed immediately!
+            size.orders.append(sale)
+        else:
+            size.sales.append(sale)
+
     return stock_products

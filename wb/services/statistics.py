@@ -3,7 +3,8 @@ import concurrent.futures
 from loguru import logger
 
 from wb.models import Product
-from wb.services.warehouse import get_weekly_payment, get_ordered_sum, get_bought_sum
+from wb.services.warehouse import (get_bought_sum, get_ordered_sum,
+                                   get_weekly_payment)
 
 
 def get_stock_statistics(products: list[Product]) -> dict:

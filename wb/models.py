@@ -42,6 +42,10 @@ class Product:
     def sales(self):
         return sum(len(size.sales) for size in self.sizes.values())
 
+    @property
+    def orders(self):
+        return sum(len(size.orders) for size in self.sizes.values())
+
 
 @dataclass
 class Size:
@@ -57,6 +61,10 @@ class Size:
     def total_sales(self):
         return len(self.sales)
 
+    @property
+    def total_orders(self):
+        return len(self.orders)
+
 
 @dataclass
 class Sale:
@@ -69,9 +77,9 @@ class Sale:
     for_pay: float = 0
 
 
-@dataclass
-class Order:
-    """WB sale with Product attached."""
-
-    quantity: int = 0
-    product: Product = None
+# @dataclass
+# class Order:
+#     """WB sale with Product attached."""
+#     date: str = ""
+#     quantity: int = 0
+#     product: Product = None
