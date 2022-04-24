@@ -48,4 +48,8 @@ def url_replace(request, field, value):
 
 @register.filter(name="format")
 def format_value(value, fmt):
-    return fmt.format(value)
+    try:
+        value = fmt.format(value)
+    except ValueError:
+        return value
+    return value

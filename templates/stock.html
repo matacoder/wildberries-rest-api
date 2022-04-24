@@ -14,13 +14,21 @@
     {% endif %}
     </h1>
     <div class="box">
-        {{ total_sku }} разных артикулов, {{ can_be_ordered_qty }} штук можно заказать (не в пути)<br>
-        {{ total }} штук на складе и в пути,<br>
+        {{ can_be_ordered_qty }} арт. на витрине + {{ sku_on_the_way }} арт. кончились = {{ total_sku }} арт.<br>
+        {{ total_in_stock}} шт. на складе + {{ in_the_way }} шт. пути = {{ total }} шт. <br>
         {{ total_value|format:"{:,}" }} рублей в продажных ценах ВБ (на складе и в пути).<br>
     </div>
     <div class="block">
+    <span class="button is-light">Отсортировать:</span>
     {% for sort_param, name in sorting_lambdas.items %}
-        <a class="button is-light" href="?filter_by={{ sort_param }}">{{ name.desc }}</a>
+        <a class="button is-success" href="?sort_by={{ sort_param }}">{{ name.desc }}</a>
+
+    {% endfor %}
+    </div>
+    <div class="block">
+    <span class="button is-light">Отфильтровать:</span>
+    {% for filter_param, name in filtering_lambdas.items %}
+        <a class="button is-success" href="?filter_by={{ filter_param }}">{{ name.desc }}</a>
 
     {% endfor %}
     </div>

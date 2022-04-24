@@ -13,12 +13,16 @@ from loguru import logger
 from _settings.settings import redis_client
 from wb.forms import ApiForm
 from wb.models import ApiKey
-from wb.services.filters import sort_products, sorting_lambdas
+from wb.services.filtering import (filter_marketplace_products,
+                                   filter_warehouse_products,
+                                   filtering_lambdas_marketplace,
+                                   filtering_lambdas_warehouse)
 from wb.services.marketplace import (get_marketplace_objects,
                                      update_marketplace_prices,
                                      update_marketplace_sales,
                                      update_warehouse_prices)
 from wb.services.rest_client.jwt_client import JWTApiClient
+from wb.services.sorting import sort_products, sorting_lambdas
 from wb.services.statistics import get_sales_statistics, get_stock_statistics
 from wb.services.tools import api_key_required
 from wb.services.warehouse import (add_weekly_orders, add_weekly_sales,
@@ -87,8 +91,12 @@ def stock(request):
     products = update_warehouse_prices(token, products)
     products = list(products.values())
 
-    filter_by = request.GET.get("filter_by", "qty")
-    products = sort_products(products, filter_by)
+    sort_by = request.GET.get("sort_by", "qty")
+    products = sort_products(products, sort_by)
+
+    filter_by = request.GET.get("filter_by")
+    if filter_by:
+        products = filter_warehouse_products(products, filter_by)
 
     # Ready to paginate
     paginator = Paginator(products, 32)
@@ -101,6 +109,7 @@ def stock(request):
     data["data"] = page_obj
     data = data | get_stock_statistics(products)
     data["sorting_lambdas"] = sorting_lambdas
+    data["filtering_lambdas"] = filtering_lambdas_warehouse
 
     return render(
         request,
@@ -130,8 +139,12 @@ def marketplace(request):
     products = update_marketplace_sales(jwt_token, products, barcode_hashmap)
 
     products = list(products.values())
-    filter_by = request.GET.get("filter_by", "qty")
-    products = sort_products(products, filter_by)
+    sort_by = request.GET.get("sort_by")
+    products = sort_products(products, sort_by)
+
+    filter_by = request.GET.get("filter_by")
+    if filter_by:
+        products = filter_marketplace_products(products, filter_by)
 
     # Ready to paginate
     paginator = Paginator(products, 32)
@@ -145,6 +158,7 @@ def marketplace(request):
 
     data = data | get_stock_statistics(products)
     data["sorting_lambdas"] = sorting_lambdas
+    data["filtering_lambdas"] = filtering_lambdas_marketplace
 
     data["marketplace"] = True
 
