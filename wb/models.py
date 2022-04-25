@@ -48,7 +48,9 @@ class Product:
 
     @property
     def barcodes(self):
-        return ", ".join(f"{size.tech_size}: {size.barcode}" for size in self.sizes.values())
+        return ", ".join(
+            f"{size.tech_size}: {size.barcode}" for size in self.sizes.values()
+        )
 
 
 @dataclass

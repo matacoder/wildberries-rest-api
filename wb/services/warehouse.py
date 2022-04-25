@@ -92,31 +92,31 @@ def add_weekly_sales(token, stock_products: dict):
 def add_weekly_orders(token, stock_products: dict):
     """Weekly orders."""
     logger.info("Applying 14 days orders to stock...")
-    raw_sales = get_ordered_products(token=token, week=False, flag=0, days=14)
+    raw_orders = get_ordered_products(token=token, week=False, flag=0, days=14)
 
-    for raw_sale in raw_sales:
-        product: Product = stock_products.get(raw_sale["nmId"])
+    for raw_order in raw_orders:
+        product: Product = stock_products.get(raw_order["nmId"])
         if product is None:
             # Not sure why stock is not displaying all products
             product = Product(
-                nm_id=raw_sale.get("nmId"),
-                supplier_article=raw_sale.get("supplierArticle"),
+                nm_id=raw_order.get("nmId"),
+                supplier_article=raw_order.get("supplierArticle"),
             )
             stock_products[product.nm_id] = product
-        size = raw_sale["techSize"]
+        size = raw_order["techSize"]
         product.sizes[size] = product.sizes.get(
             size,
-            Size(tech_size=raw_sale.get("techSize", 0)),  # Create generic size
+            Size(tech_size=raw_order.get("techSize", 0)),  # Create generic size
         )
 
         sale = Sale(
-            quantity=raw_sale["quantity"],
+            quantity=raw_order["quantity"],
         )
 
-        sale.date = raw_sale.get("date")
-        sale.price_with_disc = float(raw_sale.get("priceWithDisc", 0))
-        sale.finished_price = float(raw_sale.get("finishedPrice", 0))
-        sale.for_pay = float(raw_sale.get("forPay", 0))
+        sale.date = raw_order.get("date")
+        sale.price_with_disc = float(raw_order.get("priceWithDisc", 0))
+        sale.finished_price = float(raw_order.get("finishedPrice", 0))
+        sale.for_pay = float(raw_order.get("forPay", 0))
 
         product.sizes[size].orders.append(sale)
     return stock_products

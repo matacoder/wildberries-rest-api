@@ -22,7 +22,9 @@ from wb.services.marketplace import (get_marketplace_objects,
                                      update_marketplace_sales,
                                      update_warehouse_prices)
 from wb.services.rest_client.jwt_client import JWTApiClient
-from wb.services.sorting import sort_products, sorting_lambdas
+from wb.services.sorting import (get_marketplaces_sorting,
+                                 sort_marketplace_products, sort_products,
+                                 sorting_lambdas)
 from wb.services.statistics import get_sales_statistics, get_stock_statistics
 from wb.services.tools import api_key_required
 from wb.services.warehouse import (add_weekly_orders, add_weekly_sales,
@@ -91,7 +93,7 @@ def stock(request):
     products = update_warehouse_prices(token, products)
     products = list(products.values())
 
-    sort_by = request.GET.get("sort_by", "qty")
+    sort_by = request.GET.get("sort_by")
     products = sort_products(products, sort_by)
 
     filter_by = request.GET.get("filter_by")
@@ -140,7 +142,7 @@ def marketplace(request):
 
     products = list(products.values())
     sort_by = request.GET.get("sort_by")
-    products = sort_products(products, sort_by)
+    products = sort_marketplace_products(products, sort_by)
 
     filter_by = request.GET.get("filter_by")
     if filter_by:
@@ -157,7 +159,7 @@ def marketplace(request):
     data["data"] = page_obj
 
     data = data | get_stock_statistics(products)
-    data["sorting_lambdas"] = sorting_lambdas
+    data["sorting_lambdas"] = get_marketplaces_sorting()
     data["filtering_lambdas"] = filtering_lambdas_marketplace
 
     data["marketplace"] = True
