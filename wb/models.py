@@ -29,7 +29,7 @@ class Product:
     sizes: dict = field(default_factory=dict)
     in_way_to_client: int = 0  # inWayToClient
     in_way_from_client: int = 0  # inWayFromClient
-    barcode: str = ""
+
     days_on_site: str = ""
     has_been_updated: dict = field(default_factory=dict)
     name: str = ""
@@ -45,6 +45,10 @@ class Product:
     @property
     def orders(self):
         return sum(len(size.orders) for size in self.sizes.values())
+
+    @property
+    def barcodes(self):
+        return ", ".join(f"{size.tech_size}: {size.barcode}" for size in self.sizes.values())
 
 
 @dataclass

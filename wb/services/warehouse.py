@@ -31,7 +31,7 @@ def get_stock_objects(x64_token):
         product.discount = item["Discount"]
         product.in_way_to_client = item.get("inWayToClient", 0)
         product.in_way_from_client = item.get("inWayFromClient", 0)
-        product.barcode = item.get("barcode", 0)
+
         product.days_on_site = item.get("daysOnSite", 0)
 
         redis_key = f"{x64_token}:update_discount:{product.nm_id}"
@@ -48,6 +48,7 @@ def get_stock_objects(x64_token):
 
         # Update size values
         product.sizes[size].quantity_full = item.get("quantityFull", 0)
+        product.sizes[size].barcode = item.get("barcode", 0)
 
     return stock_products
 
