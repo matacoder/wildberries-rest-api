@@ -7,7 +7,9 @@
             <div class="card">
                 <div class="card-image">
                     <figure class="image is-3by4">
-                        <img src="{% get_image_url item.nm_id %}"/>
+                        <a target="_blank"
+                           href="https://www.wildberries.ru/catalog/{{ item.nm_id }}/detail.aspx?targetUrl=ES">
+                            <img src="{% get_image_url item.nm_id %}"/></a>
                     </figure>
                 </div>
                 <div class="card-content">
@@ -26,8 +28,8 @@
                         Номер ВБ: <a target="_blank"
                                      href="https://www.wildberries.ru/catalog/{{ item.nm_id }}/detail.aspx?targetUrl=ES">{{ item.nm_id }}</a><br/>
                         ШК: {{ item.barcodes }}<br/>
-{#                        Едет к клиентам: {{ item.in_way_to_client }},<br/>#}
-{#                        Едет от клиентов: {{ item.in_way_from_client }}<br/>#}
+                        {#                        Едет к клиентам: {{ item.in_way_to_client }},<br/>#}
+                        {#                        Едет от клиентов: {{ item.in_way_from_client }}<br/>#}
                         На сайте {{ item.days_on_site }} дней<br/>
                         <progress class="progress is-primary" value="{{ item.days_on_site }}"
                                   max="999"></progress>
