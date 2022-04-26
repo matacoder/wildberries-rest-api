@@ -1,4 +1,5 @@
 import concurrent.futures
+import datetime
 import json
 import logging
 import pickle
@@ -44,6 +45,7 @@ def update_discount(request):
     tokens = ApiKey.objects.get(user=request.user)
     jwt_token = tokens.new_api
     x64_token = tokens.api
+    timezone = 3  # Moscow time
 
     if not jwt_token:
         return HttpResponse("Нужно указать API-ключ!")
@@ -62,13 +64,17 @@ def update_discount(request):
         success, message = new_client.update_discount(wb_id, new_discount)
         if success:
             redis_key = f"{x64_token}:update_discount:{wb_id}"
+            now = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=timezone)))
+            logger.info(f"{now}, {datetime.datetime.now()}")
             redis_value = pickle.dumps(
                 {
                     "new_price": new_price,
                     "new_discount": new_discount,
+                    # A bit creepy way to introduce timezone +3 MSK
+                    "modified_at": datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=timezone)))
                 }
             )
-            redis_client.set(redis_key, redis_value, ex=60 * 60 * 4)
+            redis_client.set(redis_key, redis_value, ex=60 * 60 * 24 * 14)  # Keep info about price change for 14 days
             return HttpResponse(f"Установлена {new_discount}% скидка")
         return HttpResponse(message)
 

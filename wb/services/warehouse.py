@@ -5,7 +5,7 @@ from loguru import logger
 
 from _settings.settings import redis_client
 from wb.models import Product, Sale, Size
-from wb.services.redis import redis_cache_decorator
+from wb.services.redis import redis_cache_decorator, get_price_change_from_redis
 from wb.services.rest_client.x64_client import RETRY_DELAY, X64ApiClient
 
 
@@ -34,11 +34,7 @@ def get_stock_objects(x64_token):
 
         product.days_on_site = item.get("daysOnSite", 0)
 
-        redis_key = f"{x64_token}:update_discount:{product.nm_id}"
-        has_been_updated = redis_client.get(redis_key)
-        if has_been_updated is not None:
-            logger.info(f"Found update info for {product.nm_id}")
-            product.has_been_updated = pickle.loads(has_been_updated)
+        product = get_price_change_from_redis(product, x64_token)
 
         # Get or create new size
         size = item.get("techSize", 0)

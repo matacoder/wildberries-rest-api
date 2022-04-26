@@ -60,7 +60,7 @@
                             </form>
                             {% if item.has_been_updated %}
                                 <div class="tag is-danger">
-                                Цена: {{ item.has_been_updated.new_price }}, Скидка: {{ item.has_been_updated.new_discount }}
+                                Цена: {{ item.has_been_updated.new_price }} (-{{ item.has_been_updated.new_discount }}%, {{ item.has_been_updated.modified_at }})
                                 </div>
                             {% endif %}
                         </span>
