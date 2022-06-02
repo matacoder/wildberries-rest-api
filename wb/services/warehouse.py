@@ -1,11 +1,10 @@
-import pickle
 import time
 
 from loguru import logger
 
-from _settings.settings import redis_client
 from wb.models import Product, Sale, Size
-from wb.services.redis import redis_cache_decorator, get_price_change_from_redis
+from wb.services.redis import (get_price_change_from_redis,
+                               redis_cache_decorator)
 from wb.services.rest_client.x64_client import RETRY_DELAY, X64ApiClient
 
 

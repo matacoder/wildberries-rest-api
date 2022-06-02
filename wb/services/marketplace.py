@@ -1,11 +1,9 @@
-import pickle
-
 from django.http import HttpResponse
 from loguru import logger
 
-from _settings.settings import redis_client
 from wb.models import ApiKey, Product, Sale, Size
-from wb.services.redis import redis_cache_decorator, get_price_change_from_redis
+from wb.services.redis import (get_price_change_from_redis,
+                               redis_cache_decorator)
 from wb.services.rest_client.jwt_client import JWTApiClient
 
 

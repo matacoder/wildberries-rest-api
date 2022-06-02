@@ -13,8 +13,10 @@ import os
 from pathlib import Path
 
 import redis
+import sentry_sdk
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 from django.urls import reverse
+from sentry_sdk.integrations.django import DjangoIntegration
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -158,3 +160,18 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+
+
+
+sentry_sdk.init(
+    dsn="https://5b115d4d279e466ca173bc4cd8f53fd2@o1272655.ingest.sentry.io/6466529",
+    integrations=[DjangoIntegration()],
+    # Set traces_sample_rate to 1.0 to capture 100%
+    # of transactions for performance monitoring.
+    # We recommend adjusting this value in production.
+    traces_sample_rate=1.0,
+    # If you wish to associate users to errors (assuming you are using
+    # django.contrib.auth) you may enable sending PII data.
+    send_default_pii=True,
+)
