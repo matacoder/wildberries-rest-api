@@ -102,7 +102,7 @@ def add_weekly_orders(token, stock_products: dict):
         )
 
         sale = Sale(
-            quantity=raw_order["quantity"],
+            quantity=raw_order.get("quantity", 0)
         )
 
         sale.date = raw_order.get("date")
@@ -119,7 +119,7 @@ def get_weekly_payment(token):
     logger.info("Getting weekly payment...")
     data = get_bought_products(token, week=True, flag=0)
     if data:
-        payment = sum((x["forPay"]) for x in data)
+        payment = sum((x.get("forPay", 0)) for x in data)
         return int(payment)
     return 0
 
@@ -130,7 +130,7 @@ def get_ordered_sum(token):
     data = get_ordered_products(token)
     if data:
         return int(
-            sum((x["totalPrice"] * (1 - x["discountPercent"] / 100)) for x in data)
+            sum((x.get("totalPrice", 0) * (1 - x.get("discountPercent", 0) / 100)) for x in data)
         )
     return 0
 
@@ -140,7 +140,7 @@ def get_bought_sum(token):
     logger.info("Getting bought payment...")
     data = get_bought_products(token)
     if data:
-        return int(sum((x["forPay"]) for x in data))
+        return int(sum((x.get("forPay", 0)) for x in data))
     return 0
 
 
