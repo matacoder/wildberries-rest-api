@@ -7,8 +7,11 @@ from typing import Callable
 
 from loguru import logger
 
-from _settings.settings import (STATISTIC_REFRESH_THRESHOLD, redis_client,
-                                running_threads)
+from _settings.settings import (
+    STATISTIC_REFRESH_THRESHOLD,
+    redis_client,
+    running_threads,
+)
 
 
 def redis_cache_decorator(minutes=STATISTIC_REFRESH_THRESHOLD):

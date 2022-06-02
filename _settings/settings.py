@@ -14,6 +14,7 @@ from pathlib import Path
 
 import redis
 import sentry_sdk
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 from django.urls import reverse
 from sentry_sdk.integrations.django import DjangoIntegration
@@ -160,8 +161,6 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-
-
 
 
 sentry_sdk.init(

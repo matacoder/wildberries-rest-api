@@ -2,8 +2,7 @@ from django.http import HttpResponse
 from loguru import logger
 
 from wb.models import ApiKey, Product, Sale, Size
-from wb.services.redis import (get_price_change_from_redis,
-                               redis_cache_decorator)
+from wb.services.redis import get_price_change_from_redis, redis_cache_decorator
 from wb.services.rest_client.jwt_client import JWTApiClient
 
 

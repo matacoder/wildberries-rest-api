@@ -14,23 +14,35 @@ from loguru import logger
 from _settings.settings import redis_client
 from wb.forms import ApiForm
 from wb.models import ApiKey
-from wb.services.filtering import (filter_marketplace_products,
-                                   filter_warehouse_products,
-                                   filtering_lambdas_marketplace,
-                                   filtering_lambdas_warehouse)
-from wb.services.marketplace import (get_marketplace_objects,
-                                     update_marketplace_prices,
-                                     update_marketplace_sales,
-                                     update_warehouse_prices)
+from wb.services.filtering import (
+    filter_marketplace_products,
+    filter_warehouse_products,
+    filtering_lambdas_marketplace,
+    filtering_lambdas_warehouse,
+)
+from wb.services.marketplace import (
+    get_marketplace_objects,
+    update_marketplace_prices,
+    update_marketplace_sales,
+    update_warehouse_prices,
+)
 from wb.services.rest_client.jwt_client import JWTApiClient
-from wb.services.sorting import (get_marketplaces_sorting,
-                                 sort_marketplace_products, sort_products,
-                                 sorting_lambdas)
+from wb.services.sorting import (
+    get_marketplaces_sorting,
+    sort_marketplace_products,
+    sort_products,
+    sorting_lambdas,
+)
 from wb.services.statistics import get_sales_statistics, get_stock_statistics
 from wb.services.tools import api_key_required
-from wb.services.warehouse import (add_weekly_orders, add_weekly_sales,
-                                   get_bought_products, get_ordered_products,
-                                   get_stock_objects, get_stock_products)
+from wb.services.warehouse import (
+    add_weekly_orders,
+    add_weekly_sales,
+    get_bought_products,
+    get_ordered_products,
+    get_stock_objects,
+    get_stock_products,
+)
 
 
 def index(request):

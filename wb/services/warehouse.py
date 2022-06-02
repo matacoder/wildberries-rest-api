@@ -3,8 +3,7 @@ import time
 from loguru import logger
 
 from wb.models import Product, Sale, Size
-from wb.services.redis import (get_price_change_from_redis,
-                               redis_cache_decorator)
+from wb.services.redis import get_price_change_from_redis, redis_cache_decorator
 from wb.services.rest_client.x64_client import RETRY_DELAY, X64ApiClient
 
 
@@ -70,9 +69,7 @@ def add_weekly_sales(token, stock_products: dict):
             Size(tech_size=raw_sale.get("techSize", 0)),  # Create generic size
         )
 
-        sale = Sale(
-            quantity=raw_sale["quantity"],
-        )
+        sale = Sale(quantity=raw_sale.get("quantity", 0))
 
         sale.date = raw_sale.get("date")
         sale.price_with_disc = float(raw_sale.get("priceWithDisc", 0))
