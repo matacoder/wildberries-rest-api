@@ -10,7 +10,9 @@ def get_marketplace_objects(token):
     """Proper way to deal with products."""
     logger.info("Getting marketplace as objects")
 
-    tokens = ApiKey.objects.get(api=token)
+    # Okay, for people with several accounts we must get latest
+    tokens = ApiKey.objects.filter(api=token)
+    tokens = tokens.last()
     jwt_token = tokens.new_api
     x64_token = tokens.api
 
@@ -94,12 +96,14 @@ def update_marketplace_sales(token, stock_products, barcode_hashmap):
     orders = jwt_client.get_orders(days=14)
 
     for order in orders:
-        wm_id, size = barcode_hashmap.get(order["barcode"])
+        wm_id, size_id = barcode_hashmap.get(order["barcode"], (None, None, ))
         if not wm_id:
             logger.info(f"{order['barcode']} is not found in products")
             continue
         product = stock_products.get(wm_id)
-        size: Size = product.sizes.get(size)
+        if not product:
+            continue
+        size: Size = product.sizes.get(size_id, Size(size_id))
         status = int(order.get("status"))
         sale = Sale(
             date=order.get("dateCreated"),

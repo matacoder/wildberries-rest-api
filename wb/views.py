@@ -276,7 +276,7 @@ def weekly_orders_summary(request):
         wb_id = item["nmId"]
         sku = item["supplierArticle"]
         size = item["techSize"]
-        qty = item["quantity"]
+        qty = item.get("quantity", 0)
         stock_data = stock.get(wb_id, {"stock": 0})
 
         if wb_id not in combined:
