@@ -53,22 +53,31 @@ class JWTApiClient:
                 "skip": skip,
                 "take": offset,
             }
-            return requests.get(url, get_params, headers=self.build_headers())
+            try:
+                response = requests.get(url, get_params, headers=self.build_headers())
+            except ConnectionError as e:
+                logger.info(f"ConnectionError {e}")
+                return None
+            return response
 
         response = get_page()
+        if not response:
+            return []
         if response.status_code != 200:
             logger.info(f"{response.status_code}, {response.text}")
             return []
 
         stock = []
         batch = response.json()
-        total = int(batch.get("total"))
+        total = int(batch.get("total", 0))
+        if total == 0:
+            return []
         logger.info(f"Total {total} products")
         attempt = 1
 
-        stock += batch["stocks"]
+        stock += batch.get("stocks", 0)
         while total > offset * attempt:
-            stock += get_page(offset * attempt).json()["stocks"]
+            stock += get_page(offset * attempt).json().get("stocks", 0)
             attempt += 1
         logger.info(f"Got stocks from marketplace {len(stock)} pcs.")
         return stock
