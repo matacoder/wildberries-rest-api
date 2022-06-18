@@ -13,9 +13,8 @@
                     </figure>
                 </div>
                 <div class="card-content">
-                    <a target="_blank"
-                       href="https://www.wildberries.ru/catalog/{{ item.nm_id }}/detail.aspx?targetUrl=ES">
-                        <p class="title is-5">{{ item.supplier_article }}</p></a>
+                    <p class="title is-5"><a href="https://seller.wb.ru/new-goods/product-card/card?vendorCode={{ item.supplier_article }}" target="_blank">{{ item.supplier_article }} <br>
+                    ✏️редактировать</a></p>
                     <p class="block"> {% for size in item.sizes.values %}<span class="button is-light">
                         <span class="tag is-success">{{ size.tech_size }}</span>&nbsp;
                         Выкуп: {{ size.total_sales }}
