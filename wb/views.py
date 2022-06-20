@@ -4,13 +4,15 @@ import json
 import logging
 import pickle
 from multiprocessing.pool import ThreadPool
+from rest_framework.decorators import api_view
 
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 from loguru import logger
-
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
 from _settings.settings import redis_client
 from wb.forms import ApiForm
 from wb.models import ApiKey
@@ -20,6 +22,7 @@ from wb.services.filtering import (
     filtering_lambdas_marketplace,
     filtering_lambdas_warehouse,
 )
+from wb.services.json_encoder import ObjectDict
 from wb.services.marketplace import (
     get_marketplace_objects,
     update_marketplace_prices,
@@ -144,6 +147,33 @@ def stock(request):
     )
 
 
+x64_token = openapi.Parameter(
+    "x64_token",
+    openapi.IN_QUERY,
+    description="x64_token https://seller.wb.ru/supplier-settings/access-to-api",
+    type=openapi.TYPE_STRING,
+)
+jwt_token = openapi.Parameter(
+    "jwt_token",
+    openapi.IN_QUERY,
+    description="jwt_token https://seller.wb.ru/supplier-settings/access-to-new-api",
+    type=openapi.TYPE_STRING,
+)
+
+
+@swagger_auto_schema(method="get", manual_parameters=[x64_token])
+@api_view(http_method_names=["GET"])
+def api_stock(request):
+    if "x64_token" not in request.GET:
+        return JsonResponse({"error": "x64_token is not provided"})
+    token = request.GET["x64_token"]
+    products = get_stock_objects(token)
+    products = add_weekly_sales(token, products)
+    products = add_weekly_orders(token, products)
+    products = update_warehouse_prices(token, products)
+    return JsonResponse(products, encoder=ObjectDict, json_dumps_params={"indent": 4})
+
+
 @login_required
 @api_key_required
 def marketplace(request):
@@ -193,6 +223,20 @@ def marketplace(request):
         "stock.html",
         data,
     )
+
+
+@swagger_auto_schema(method="get", manual_parameters=[x64_token, jwt_token])
+@api_view(http_method_names=["GET"])
+def api_marketplace(request):
+    if "x64_token" not in request.GET or "jwt_token" not in request.GET:
+        return JsonResponse({"error": "x64_token or jwt_token are not provided"})
+    x64_token = request.GET["x64_token"]
+    jwt_token = request.GET["jwt_token"]
+    products, barcode_hashmap = get_marketplace_objects(x64_token)
+    products = update_marketplace_prices(x64_token, products)
+    products = update_marketplace_sales(jwt_token, products, barcode_hashmap)
+
+    return JsonResponse(products, encoder=ObjectDict, json_dumps_params={"indent": 4})
 
 
 @login_required

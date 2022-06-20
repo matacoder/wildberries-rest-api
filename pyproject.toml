@@ -19,6 +19,8 @@ loguru = "^0.6.0"
 redis = "^4.2.2"
 sentry-sdk = "^1.5.12"
 pyOpenSSL = "^22.0.0"
+django-rest-framework = "^0.1.0"
+drf-yasg = "^1.20.0"
 
 [tool.poetry.dev-dependencies]
 

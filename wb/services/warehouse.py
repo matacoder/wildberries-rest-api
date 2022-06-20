@@ -101,9 +101,7 @@ def add_weekly_orders(token, stock_products: dict):
             Size(tech_size=raw_order.get("techSize", 0)),  # Create generic size
         )
 
-        sale = Sale(
-            quantity=raw_order.get("quantity", 0)
-        )
+        sale = Sale(quantity=raw_order.get("quantity", 0))
 
         sale.date = raw_order.get("date")
         sale.price_with_disc = float(raw_order.get("priceWithDisc", 0))
@@ -130,7 +128,10 @@ def get_ordered_sum(token):
     data = get_ordered_products(token)
     if data:
         return int(
-            sum((x.get("totalPrice", 0) * (1 - x.get("discountPercent", 0) / 100)) for x in data)
+            sum(
+                (x.get("totalPrice", 0) * (1 - x.get("discountPercent", 0) / 100))
+                for x in data
+            )
         )
     return 0
 

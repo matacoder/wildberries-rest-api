@@ -96,7 +96,13 @@ def update_marketplace_sales(token, stock_products, barcode_hashmap):
     orders = jwt_client.get_orders(days=14)
 
     for order in orders:
-        wm_id, size_id = barcode_hashmap.get(order["barcode"], (None, None, ))
+        wm_id, size_id = barcode_hashmap.get(
+            order["barcode"],
+            (
+                None,
+                None,
+            ),
+        )
         if not wm_id:
             logger.info(f"{order['barcode']} is not found in products")
             continue

@@ -1,3 +1,4 @@
+import json
 from dataclasses import dataclass, field
 
 from django.contrib.auth import get_user_model

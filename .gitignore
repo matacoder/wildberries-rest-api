@@ -11,3 +11,4 @@ static/admin/*
 /static/debug_toolbar/
 /static/bulma/
 /.env.rocket
+/static/drf-yasg/
