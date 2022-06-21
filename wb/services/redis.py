@@ -53,7 +53,10 @@ def redis_cache_decorator(minutes=STATISTIC_REFRESH_THRESHOLD):
                 # logger.info(
                 #     f"Redis decorator for {func.__name__}: finished calc in thread!"
                 # )
-                running_threads.remove(redis_full_key)
+                try:
+                    running_threads.remove(redis_full_key)
+                except KeyError:
+                    pass
                 return result
 
             if not cached_result:
