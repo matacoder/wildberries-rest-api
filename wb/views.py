@@ -122,13 +122,14 @@ def stock(request):
     products = list(products.values())
 
     sort_by = request.GET.get("sort_by")
-    search_keyword = request.GET.get("search")
+
     products = sort_products(products, sort_by)
 
     filter_by = request.GET.get("filter_by")
     if filter_by:
         products = filter_warehouse_products(products, filter_by)
 
+    search_keyword = request.GET.get("search")
     if search_keyword:
         products = search_warehouse_products(products, search_keyword)
 
@@ -207,6 +208,9 @@ def marketplace(request):
     if filter_by:
         products = filter_marketplace_products(products, filter_by)
 
+    search_keyword = request.GET.get("search")
+    if search_keyword:
+        products = search_warehouse_products(products, search_keyword)
     # Ready to paginate
     paginator = Paginator(products, 32)
     page_number = request.GET.get("page")

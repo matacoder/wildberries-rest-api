@@ -41,6 +41,7 @@ def get_marketplace_objects(token):
         product.name = item.get("name", "")
         product.subject = item.get("subject", "")
         product.brand = item.get("brand", "")
+        product.category = item.get("category", "")
 
         product = get_price_change_from_redis(product, x64_token)
 

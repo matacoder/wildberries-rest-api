@@ -13,7 +13,7 @@
                     </figure>
                 </div>
                 <div class="card-content">
-                    <p class="title is-5"><a href="https://seller.wb.ru/new-goods/product-card/card?vendorCode={{ item.supplier_article }}" target="_blank">{{ item.brand }} {{ item.category }} {{ item.subject }}<br>
+                    <p class="title is-5"><a href="https://seller.wb.ru/new-goods/product-card/card?vendorCode={{ item.supplier_article }}" target="_blank">{{ item.brand }} {{ item.category }} {{ item.subject }} {{ item.name }}<br>
                     ✏️редактировать</a></p>
                     <p class="block"> {% for size in item.sizes.values %}<span class="button is-light">
                         <span class="tag is-success">{{ size.tech_size }}</span>&nbsp;
@@ -31,8 +31,8 @@
                         {#                        Едет к клиентам: {{ item.in_way_to_client }},<br/>#}
                         {#                        Едет от клиентов: {{ item.in_way_from_client }}<br/>#}
                         На сайте {{ item.days_on_site }} дней<br/>
-                        <progress class="progress is-primary" value="{{ item.days_on_site }}"
-                                  max="999"></progress>
+{#                        <progress class="progress is-primary" value="{{ item.days_on_site }}"#}
+{#                                  max="999"></progress>#}
                         Остаток: {{ item.stock }} шт.<br/>
                         Всего купили: {{ item.sales }} шт.<br/>
                         Всего заказали: {{ item.orders }} шт.<br/>
