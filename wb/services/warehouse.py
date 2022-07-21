@@ -25,6 +25,10 @@ def get_stock_objects(x64_token):
 
         # Update product
         product.price = int(item["Price"] * ((100 - item["Discount"]) / 100))
+        product.subject = item.get('subject', "")
+        product.category = item.get('category', "")
+        product.brand = item.get('brand', "")
+
         product.full_price = int(item["Price"])
         product.discount = item["Discount"]
         product.in_way_to_client = item.get("inWayToClient", 0)

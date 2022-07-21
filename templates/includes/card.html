@@ -13,7 +13,7 @@
                     </figure>
                 </div>
                 <div class="card-content">
-                    <p class="title is-5"><a href="https://seller.wb.ru/new-goods/product-card/card?vendorCode={{ item.supplier_article }}" target="_blank">{{ item.supplier_article }} <br>
+                    <p class="title is-5"><a href="https://seller.wb.ru/new-goods/product-card/card?vendorCode={{ item.supplier_article }}" target="_blank">{{ item.brand }} {{ item.category }} {{ item.subject }}<br>
                     ✏️редактировать</a></p>
                     <p class="block"> {% for size in item.sizes.values %}<span class="button is-light">
                         <span class="tag is-success">{{ size.tech_size }}</span>&nbsp;
@@ -26,6 +26,7 @@
                     <div class="content">
                         Номер ВБ: <a target="_blank"
                                      href="https://www.wildberries.ru/catalog/{{ item.nm_id }}/detail.aspx?targetUrl=ES">{{ item.nm_id }}</a><br/>
+                        Артикул: {{ item.supplier_article }}<br/>
                         ШК: {{ item.barcodes }}<br/>
                         {#                        Едет к клиентам: {{ item.in_way_to_client }},<br/>#}
                         {#                        Едет от клиентов: {{ item.in_way_from_client }}<br/>#}

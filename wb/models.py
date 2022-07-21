@@ -30,6 +30,9 @@ class Product:
     sizes: dict = field(default_factory=dict)
     in_way_to_client: int = 0  # inWayToClient
     in_way_from_client: int = 0  # inWayFromClient
+    subject: str = ""
+    category: str = ""
+    brand: str = ""
 
     days_on_site: str = ""
     has_been_updated: dict = field(default_factory=dict)
