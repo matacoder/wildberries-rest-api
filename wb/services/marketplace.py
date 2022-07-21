@@ -25,7 +25,7 @@ def get_marketplace_objects(token):
     stock_products = dict()
 
     # For some reason WB don't use wb_id in marketplace sales
-    # So to increase speed pf access we create barcode -> wb_id hash
+    # So to increase speed of access we create barcode -> wb_id hash
     barcode_hashmap = dict()
 
     for item in raw_stock:

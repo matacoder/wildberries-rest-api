@@ -4,7 +4,14 @@
 
 {% block content %}
     {% load custom_tags %}
+    <div class="field is-grouped">
     {% include 'includes/revenue.html' %}
+    <form method="get">
+        <div class="field is-grouped">
+        <input type="text" id="search" name="search" class="input"><button type="submit" class="button ">Искать</button>
+        </div>
+    </form>
+    </div>
     <br/>
     <h1 class="title">
     {% if marketplace is not True %}

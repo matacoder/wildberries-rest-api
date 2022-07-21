@@ -30,6 +30,7 @@ from wb.services.marketplace import (
     update_warehouse_prices,
 )
 from wb.services.rest_client.jwt_client import JWTApiClient
+from wb.services.search import search_warehouse_products
 from wb.services.sorting import (
     get_marketplaces_sorting,
     sort_marketplace_products,
@@ -121,11 +122,15 @@ def stock(request):
     products = list(products.values())
 
     sort_by = request.GET.get("sort_by")
+    search_keyword = request.GET.get("search")
     products = sort_products(products, sort_by)
 
     filter_by = request.GET.get("filter_by")
     if filter_by:
         products = filter_warehouse_products(products, filter_by)
+
+    if search_keyword:
+        products = search_warehouse_products(products, search_keyword)
 
     # Ready to paginate
     paginator = Paginator(products, 32)
