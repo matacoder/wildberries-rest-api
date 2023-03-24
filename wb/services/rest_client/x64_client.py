@@ -11,12 +11,17 @@ class X64ApiClient:
 
     def __init__(self, token):
         self.token = token
-        self.base_url = "https://suppliers-stats.wildberries.ru/api/v1/supplier/"
 
-    @staticmethod
-    def connect(params, server):
+        self.base_url = "https://statistics-api.wildberries.ru/api/v1/supplier/"
+
+
+    def connect(self, params, server):
         # redis_client.get_date
-        response = requests.get(url=server, params=params)
+
+        headers = {
+            "Authorization": self.token,
+        }
+        response = requests.get(url=server, params=params, headers=headers)
         logger.info(f"URL WAS: {response.url}")
         return response
 

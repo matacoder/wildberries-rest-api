@@ -52,6 +52,7 @@ from wb.services.warehouse import (
 def index(request):
     # https://images.wbstatic.net/portal/education/Kak_rabotat'_s_servisom_statistiki.pdf
     # https://suppliers-api.wildberries.ru/swagger/index.html
+    # https://openapi.wb.ru/
     return render(request, "index.html", {})
 
 

@@ -8,9 +8,9 @@ User = get_user_model()
 
 
 class ApiKey(models.Model):
-    api = models.CharField(max_length=200, verbose_name="Ключ API (x64)")
+    api = models.CharField(max_length=200, verbose_name="Ключ API для сервиса статистики")
     new_api = models.CharField(
-        max_length=400, default="", verbose_name="Ключ нового API (JWT)"
+        max_length=400, default="", verbose_name="Ключ API стандартный"
     )
     user = models.OneToOneField(User, on_delete=models.CASCADE, unique=True)
 
