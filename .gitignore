@@ -12,3 +12,4 @@ static/admin/*
 /static/bulma/
 /.env.rocket
 /static/drf-yasg/
+*.pyc

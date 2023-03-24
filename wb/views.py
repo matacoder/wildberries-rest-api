@@ -384,13 +384,13 @@ def get_stock_as_dict(request):
         }
         data = stock_as_dict.get(key, data)
 
-        data["in"] = data.get("in", 0) + item["inWayToClient"]
-        data["out"] = data.get("out", 0) + item["inWayFromClient"]
-        data["stock"] = data.get("stock", 0) + item["quantityFull"]
+        data["in"] = data.get("in", 0) + item.get("inWayToClient",0)
+        data["out"] = data.get("out", 0) + item.get("inWayFromClient",0)
+        data["stock"] = data.get("stock", 0) + item.get("quantityFull",0)
 
         sizes = data.get("sizes", dict())
         size = item.get("techSize", 0)
-        sizes[size] = sizes.get(size, 0) + item["quantityFull"]
+        sizes[size] = sizes.get(size, 0) + item.get("quantityFull",0)
 
         data["sizes"] = sizes
         stock_as_dict[key] = data
