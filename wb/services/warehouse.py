@@ -206,5 +206,6 @@ def attach_images(standard_token, products: dict):
     images = client.get_content()
     for wb_id, product in products.items():
         if wb_id in images:
-            product.image = images[wb_id]
+            product.image = images[wb_id]["image"]
+            product.object = images[wb_id]["object"]
     return products

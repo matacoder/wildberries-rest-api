@@ -13,7 +13,7 @@
                     </figure>
                 </div>
                 <div class="card-content">
-                    <p class="title is-5"><a href="https://seller.wb.ru/new-goods/product-card/card?vendorCode={{ item.supplier_article }}" target="_blank">{{ item.brand }} {{ item.category }} {{ item.subject }} {{ item.name }}<br>
+                    <p class="title is-5"><a href="https://seller.wb.ru/new-goods/product-card/card?vendorCode={{ item.supplier_article }}" target="_blank">{{ item.brand }} {{ item.category }} {{ item.subject }} {{ item.name }} {{ item.object }}<br>
                     ✏️редактировать</a></p>
                     <p class="block"> {% for size in item.sizes.values %}<span class="button is-light">
                         <span class="tag is-success">{{ size.tech_size }}</span>&nbsp;

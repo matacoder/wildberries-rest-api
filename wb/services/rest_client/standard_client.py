@@ -133,7 +133,7 @@ class StandardApiClient:
                 }
             }
         }
-        images = dict()
+        content = dict()
         total = 1000  # Any number above 1000 will do
         limit = 1000
         while total >= limit:
@@ -151,10 +151,12 @@ class StandardApiClient:
                 cards = data["cards"]
 
                 for card in cards:
-                    images[card["nmID"]] = card["mediaFiles"][0]
+                    content[card["nmID"]] = {
+                        "image": card["mediaFiles"][0],
+                        "object": card["object"]
+                    }
             else:
                 logger.info(response.text)
                 break
         logger.info("Exit loop")
-        return images
-
+        return content
