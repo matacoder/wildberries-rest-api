@@ -202,6 +202,7 @@ def marketplace(request):
     products, barcode_hashmap = get_marketplace_objects(x64_token)
     products = update_marketplace_prices(x64_token, products)
     products = update_marketplace_sales(jwt_token, products, barcode_hashmap)
+    products = attach_images(jwt_token, products)
 
     products = list(products.values())
     sort_by = request.GET.get("sort_by")
