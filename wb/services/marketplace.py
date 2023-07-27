@@ -3,7 +3,7 @@ from loguru import logger
 
 from wb.models import ApiKey, Product, Sale, Size
 from wb.services.redis import get_price_change_from_redis, redis_cache_decorator
-from wb.services.rest_client.jwt_client import JWTApiClient
+from wb.services.rest_client.standard_client import StandardApiClient
 
 
 def get_marketplace_objects(token):
@@ -19,7 +19,7 @@ def get_marketplace_objects(token):
     if not jwt_token:
         return HttpResponse("Нужно указать API-ключ!")
 
-    new_client = JWTApiClient(jwt_token)
+    new_client = StandardApiClient(jwt_token)
 
     raw_stock = new_client.get_stock()
     stock_products = dict()
@@ -68,7 +68,7 @@ def update_prices(token, stock_products):
     if not new_token:
         return HttpResponse("Нужно указать API-ключ!")
 
-    new_client = JWTApiClient(new_token)
+    new_client = StandardApiClient(new_token)
 
     prices = new_client.get_prices()
 
@@ -95,7 +95,7 @@ def update_warehouse_prices(token, stock_products):
 
 @redis_cache_decorator(minutes=1)
 def update_marketplace_sales(token, stock_products, barcode_hashmap):
-    jwt_client = JWTApiClient(token)
+    jwt_client = StandardApiClient(token)
     orders = jwt_client.get_orders(days=14)
 
     for order in orders:

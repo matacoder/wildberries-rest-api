@@ -6,7 +6,7 @@ from wb.services.tools import get_date
 RETRY_DELAY = 0.1
 
 
-class X64ApiClient:
+class StatisticsApiClient:
     """Get WB stock statistics."""
 
     def __init__(self, token):

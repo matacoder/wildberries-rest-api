@@ -6,12 +6,12 @@ from loguru import logger
 from wb.services.tools import get_date
 
 
-class JWTApiClient:
+class StandardApiClient:
     """Get Marketplace Statistics."""
 
     def __init__(self, new_api_key: str):
         self.token = new_api_key
-        self.base = "https://suppliers-api.wildberries.ru/public/api/"
+        self.base = "https://suppliers-api.wildberries.ru/"
 
     def build_headers(self):
         return {
@@ -21,7 +21,7 @@ class JWTApiClient:
         }
 
     def update_discount(self, wb_id, new_discount):
-        url = self.base + "v1/updateDiscounts"
+        url = self.base + "public/api/v1/updateDiscounts"
         data = [{"discount": int(new_discount), "nm": int(wb_id)}]
 
         response = requests.post(
@@ -35,7 +35,7 @@ class JWTApiClient:
         return False, error
 
     def get_prices(self):
-        url = self.base + "v1/info"
+        url = self.base + "public/api/v1/info"
 
         response = requests.get(url, headers=self.build_headers())
 
@@ -44,7 +44,7 @@ class JWTApiClient:
         return []
 
     def get_stock(self):
-        url = f"https://suppliers-api.wildberries.ru/api/v2/stocks"
+        url = self.base + "api/v2/stocks"
 
         offset = 200
 
@@ -83,7 +83,7 @@ class JWTApiClient:
         return stock
 
     def get_orders(self, days):
-        url = "https://suppliers-api.wildberries.ru/api/v2/orders"
+        url = self.base + "api/v2/orders"
 
         offset = 200
 
@@ -112,3 +112,36 @@ class JWTApiClient:
             attempt += 1
         logger.info(f"Got orders from marketplace {len(orders)} pcs.")
         return orders
+
+    def get_content(self):
+        """Get all content to obtain tricky images' urls. Must be cached properly, heavy request."""
+        logger.info("Getting content...")
+        url = self.base + "content/v1/cards/cursor/list"
+
+        first_payload = {
+            "sort": {
+                "cursor": {
+                    "limit": 1000
+                },
+                "filter": {
+                    "withPhoto": -1,
+                    "allowedCategoriesOnly": True
+                },
+                "sort": {
+                    "sortColumn": "updateAt",
+                    "ascending": False
+                }
+            }
+        }
+        images = dict()
+
+        response = requests.post(url, headers=self.build_headers(), data=json.dumps(first_payload))
+        ## TODO: while loop to take more than 1000 images and add cache
+        if response.status_code == 200:
+            data = response.json()["data"]
+            cards = data["cards"]
+
+            for card in cards:
+                images[card["nmID"]] = card["mediaFiles"][0]
+            return images
+        return images

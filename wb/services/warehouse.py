@@ -4,7 +4,8 @@ from loguru import logger
 
 from wb.models import Product, Sale, Size
 from wb.services.redis import get_price_change_from_redis, redis_cache_decorator
-from wb.services.rest_client.x64_client import RETRY_DELAY, X64ApiClient
+from wb.services.rest_client.standard_client import StandardApiClient
+from wb.services.rest_client.statistics_client import RETRY_DELAY, StatisticsApiClient
 
 
 def get_stock_objects(x64_token):
@@ -151,7 +152,7 @@ def get_bought_sum(token):
 
 @redis_cache_decorator()
 def get_ordered_products(token, week=False, flag=1, days=None):
-    client = X64ApiClient(token)
+    client = StatisticsApiClient(token)
     data = client.get_ordered(url="orders", week=week, flag=flag, days=days)
     attempt = 0
     while data.status_code != 200:
@@ -166,7 +167,7 @@ def get_ordered_products(token, week=False, flag=1, days=None):
 
 @redis_cache_decorator()
 def get_bought_products(token, week=False, flag=1, days=None):
-    client = X64ApiClient(token)
+    client = StatisticsApiClient(token)
     data = client.get_ordered(url="sales", week=week, flag=flag, days=days)
     attempt = 0
     while data.status_code != 200:
@@ -183,7 +184,7 @@ def get_bought_products(token, week=False, flag=1, days=None):
 def get_stock_products(token):
     """Getting products in stock."""
     logger.info("Getting products in stock.")
-    client = X64ApiClient(token)
+    client = StatisticsApiClient(token)
     data = client.get_stock()
     logger.info(data)
     attempt = 0
@@ -196,3 +197,12 @@ def get_stock_products(token):
         data = client.get_stock()
     logger.info(data.text[:100])
     return data.json()
+
+def attach_images(standard_token, products: dict):
+    logger.info("Attaching images...")
+    client = StandardApiClient(standard_token)
+    images = client.get_content()
+    for wb_id, product in products.items():
+        if wb_id in images:
+            product.image = images[wb_id]
+    return products

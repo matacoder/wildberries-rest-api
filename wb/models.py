@@ -33,6 +33,7 @@ class Product:
     subject: str = ""
     category: str = ""
     brand: str = ""
+    image: str = ""
 
     days_on_site: str = ""
     has_been_updated: dict = field(default_factory=dict)
@@ -85,7 +86,6 @@ class Sale:
     price_with_disc: float = 0
     finished_price: float = 0
     for_pay: float = 0
-
 
 # @dataclass
 # class Order:

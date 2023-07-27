@@ -29,7 +29,7 @@ from wb.services.marketplace import (
     update_marketplace_sales,
     update_warehouse_prices,
 )
-from wb.services.rest_client.jwt_client import JWTApiClient
+from wb.services.rest_client.standard_client import StandardApiClient
 from wb.services.search import search_warehouse_products
 from wb.services.sorting import (
     get_marketplaces_sorting,
@@ -45,7 +45,7 @@ from wb.services.warehouse import (
     get_bought_products,
     get_ordered_products,
     get_stock_objects,
-    get_stock_products,
+    get_stock_products, attach_images,
 )
 
 
@@ -67,7 +67,7 @@ def update_discount(request):
     if not jwt_token:
         return HttpResponse("Нужно указать API-ключ!")
 
-    new_client = JWTApiClient(jwt_token)
+    new_client = StandardApiClient(jwt_token)
     wb_id = request.GET.get("wb_id")
 
     new_price = int(request.GET.get("new_price"))
@@ -107,19 +107,21 @@ def update_discount(request):
 def stock(request):
     """Display products in stock."""
     logger.info("View: requested stock")
-    token = ApiKey.objects.get(user=request.user.id).api
+    statistics_token = ApiKey.objects.get(user=request.user.id).api
+    standard_token = ApiKey.objects.get(user=request.user.id).new_api
 
     # Statistics have 3 requests that take 30+ seconds, so we start another thread pool here
     # Tread doesn't support return value!
     pool = ThreadPool(processes=1)
-    async_result = pool.apply_async(get_sales_statistics, (token,))
+    async_result = pool.apply_async(get_sales_statistics, (statistics_token,))
     # and actually 3 more threads inside. Magic!
 
     # So here actually we have 4 concurrent requests
-    products = get_stock_objects(token)
-    products = add_weekly_sales(token, products)
-    products = add_weekly_orders(token, products)
-    products = update_warehouse_prices(token, products)
+    products = get_stock_objects(statistics_token)
+    products = add_weekly_sales(statistics_token, products)
+    products = add_weekly_orders(statistics_token, products)
+    products = update_warehouse_prices(statistics_token, products)
+    products = attach_images(standard_token, products)
     products = list(products.values())
 
     sort_by = request.GET.get("sort_by")
