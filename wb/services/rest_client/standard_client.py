@@ -134,14 +134,27 @@ class StandardApiClient:
             }
         }
         images = dict()
+        total = 1000  # Any number above 1000 will do
+        limit = 1000
+        while total >= limit:
+            response = requests.post(url, headers=self.build_headers(), data=json.dumps(first_payload))
+            logger.info(f"Entering loop")
+            if response.status_code == 200:
 
-        response = requests.post(url, headers=self.build_headers(), data=json.dumps(first_payload))
-        ## TODO: while loop to take more than 1000 images and add cache
-        if response.status_code == 200:
-            data = response.json()["data"]
-            cards = data["cards"]
+                data = response.json()["data"]
+                total = int(data["cursor"]["total"])
+                logger.info(f"Total cards: {data['cursor']}")
 
-            for card in cards:
-                images[card["nmID"]] = card["mediaFiles"][0]
-            return images
+                first_payload["sort"]["cursor"]["updatedAt"] = data["cursor"]["updatedAt"]
+                first_payload["sort"]["cursor"]["nmID"] = data["cursor"]["nmID"]
+                logger.info(first_payload)
+                cards = data["cards"]
+
+                for card in cards:
+                    images[card["nmID"]] = card["mediaFiles"][0]
+            else:
+                logger.info(response.text)
+                break
+        logger.info("Exit loop")
         return images
+

@@ -198,6 +198,8 @@ def get_stock_products(token):
     logger.info(data.text[:100])
     return data.json()
 
+
+@redis_cache_decorator(60)
 def attach_images(standard_token, products: dict):
     logger.info("Attaching images...")
     client = StandardApiClient(standard_token)
