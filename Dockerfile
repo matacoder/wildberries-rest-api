@@ -5,10 +5,6 @@ ENV PYTHONDONTWRITEBYTECODE 1
 # Turns off buffering for easier container logging
 ENV PYTHONUNBUFFERED 1
 
-ENV POETRY_HOME=/opt/poetry
-
-ENV PATH="$POETRY_HOME/bin:$PATH"
-
 # Install essential tools
 RUN apt-get -y update && apt-get install -y \
     wget \
@@ -17,14 +13,11 @@ RUN apt-get -y update && apt-get install -y \
 
 # Install and setup poetry
 RUN pip install -U pip \
-    && apt install -y curl netcat \
-    && curl -sSL https://install.python-poetry.org | python3 -
-
+    && pip install poetry
+ENV PATH="${PATH}:/root/.poetry/bin"
 
 WORKDIR /code
 COPY . /code
-
-
 # Run poetry
 RUN poetry config virtualenvs.create false \
   && poetry install --no-interaction --no-ansi
